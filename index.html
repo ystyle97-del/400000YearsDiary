@@ -16,13 +16,12 @@
         .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; padding: 24px; display: flex; flex-direction: row; justify-content: space-between; }
         .interactive { pointer-events: auto; }
 
-        /* 左側：上部に寄せて時間軸（画面中央）との重複を完全に回避 */
+        /* 左側：入力パネル */
         .left-zone { width: 340px; display: flex; flex-direction: column; gap: 16px; justify-content: flex-start; }
         
         header h1 { font-size: 1.5rem; font-weight: 300; letter-spacing: 0.2em; color: #9ca3af; text-shadow: 0 0 10px rgba(156, 163, 175, 0.3); }
         header p { font-size: 0.8rem; color: #4b5563; margin-top: 4px; }
 
-        /* 入力パネルのコンパクト化 */
         .input-panel { background: rgba(11, 15, 26, 0.85); border: 1px solid rgba(75, 85, 99, 0.3); border-radius: 6px; padding: 16px; backdrop-filter: blur(8px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .panel-title { font-size: 0.8rem; letter-spacing: 0.1em; color: #9ca3af; margin-bottom: 12px; border-bottom: 1px solid rgba(75, 85, 99, 0.2); padding-bottom: 6px; }
         
@@ -34,8 +33,8 @@
         .submit-btn { width: 100%; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid rgba(96, 165, 250, 0.4); color: #93c5fd; padding: 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; letter-spacing: 0.1em; font-weight: bold; transition: all 0.3s ease; }
         .submit-btn:hover { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; border-color: #fff; box-shadow: 0 0 15px rgba(37, 99, 235, 0.4); text-shadow: 0 0 5px rgba(255,255,255,0.5); }
 
-        /* 右側：インフォメーションとミニマップ */
-        .right-zone { display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; width: 340px; }
+        /* 右側：HUDと3Dミニマップ */
+        .right-zone { width: 340px; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; }
         
         .hud { background: rgba(3, 7, 18, 0.7); padding: 12px 20px; border-radius: 4px; border-left: 2px solid #374151; font-size: 0.8rem; font-family: monospace; color: #9ca3af; white-space: nowrap; backdrop-filter: blur(4px); }
         .hud span { color: #f3f4f6; font-weight: bold; }
@@ -48,9 +47,10 @@
 
         .minimap-container { background: rgba(11, 15, 26, 0.85); border: 1px solid rgba(75, 85, 99, 0.3); border-radius: 4px; padding: 12px; width: 320px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
         .minimap-title { font-size: 0.65rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 8px; font-family: monospace; }
-        #minimapCanvas { display: block; background: rgba(3, 7, 18, 0.7); border-radius: 2px; }
+        
+        /* 💡 修正：ミニマップのCanvasサイズをCSSでも明示的に固定 */
+        #minimapCanvas { display: block; background: rgba(3, 7, 18, 0.7); border-radius: 2px; width: 296px; height: 140px; }
 
-        /* HTML要素としてタイムライン上に浮かぶSNSリンクボタン用スタイル */
         .timeline-link-btn { position: absolute; background: rgba(37, 99, 235, 0.8); border: 1px solid #60a5fa; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer; text-decoration: none; pointer-events: auto; z-index: 10; transition: all 0.2s; }
         .timeline-link-btn:hover { background: #2563eb; box-shadow: 0 0 8px #60a5fa; }
     </style>
@@ -62,7 +62,6 @@
         <div id="link-buttons-container"></div>
         
         <div class="ui-layer">
-            <!-- 左側：時間軸（中央）を完全に避けるために上部にのみ配置 -->
             <div class="left-zone">
                 <header>
                     <h1>40万年日記</h1>
@@ -85,7 +84,6 @@
                 </div>
             </div>
 
-            <!-- 右側：HUDと3Dミニマップ -->
             <div class="right-zone">
                 <div class="hud">
                     VIEW RANGE: <span id="hud-start">400,000年前</span> 〜 <span id="hud-end">現在</span>
@@ -94,6 +92,7 @@
                 <div class="bottom-right-zone interactive">
                     <div class="minimap-container">
                         <div class="minimap-title" id="minimap-mode-title">TOTAL HISTORY SCALE</div>
+                        <!-- 💡 修正：内部的な解像度（ピクセル数）をHTML属性でも再度固定 -->
                         <canvas id="minimapCanvas" width="296" height="140"></canvas>
                     </div>
 
@@ -113,14 +112,13 @@
         const mCtx = mCanvas.getContext('2d');
         const linkContainer = document.getElementById('link-buttons-container');
         
-        // 1. 人類史マスターデータベース
         const HISTORICAL_MASTER_DB = [
             { year: -400000, label: "初期ホモ・サピエンスの出現" },
             { year: -300000, label: "火の日常的な利用の普及" },
             { year: -170000, label: "衣服の着用の始まり（衣服の起源）" },
             { year: -70000, label: "トバ・カタストロフ（人類の絶滅危機）" },
             { year: -50000, label: "認知革命（言語や集団シンボルの誕生）" },
-            { year: -40000, label: "最古 of 洞窟壁画（アルタミラ・ラスコー）" },
+            { year: -4000, label: "最古の cave 壁画（アルタミラ・ラスコー）" },
             { year: -10000, label: "最古の農耕の開始（肥沃な三日月地帯）" },
             { year: -5500, label: "「車輪」の発明（メソポタミア）" },
             { year: -3000, label: "メソポタミア・楔形文字の発明" },
@@ -147,13 +145,9 @@
             { year: 1991, label: "ワールド・ワイド・ウェブ（WWW）が一般公開" }
         ];
 
-        // 2. 状態管理（LocalStorageからロード）
         let userRecords = JSON.parse(localStorage.getItem('chronos_user_records')) || [];
         let unlockedHistoryIds = JSON.parse(localStorage.getItem('chronos_unlocked_history')) || [0, 1, 3, 4, 6, 8, 9, 13, 14, 19, 28];
-        
-        // 🧠 ② 新設：最後に解放された歴史イベントのIDを追跡する状態変数
-        let latestUnlockedId = localStorage.getItem('chronos_latest_unlocked_id') !== null ? 
-            parseInt(localStorage.getItem('chronos_latest_unlocked_id')) : null;
+        let latestUnlockedId = localStorage.getItem('chronos_latest_unlocked_id') !== null ? parseInt(localStorage.getItem('chronos_latest_unlocked_id')) : null;
 
         const START_YEAR = -400000;
         const END_YEAR = 2026;
@@ -176,28 +170,25 @@
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+            
+            // 💡 修正：ロード時のサイズ誤認を防ぐため、リサイズ時にもミニマップのピクセル数を厳密に再固定
+            mCanvas.width = 296;
+            mCanvas.height = 140;
         }
         window.addEventListener('resize', resizeCanvas);
         resizeCanvas();
 
-        function yearToX(year) {
-            return ((year - viewLeft) / (viewRight - viewLeft)) * canvas.width;
-        }
-
-        function xToYear(x) {
-            return viewLeft + (x / canvas.width) * (viewRight - viewLeft);
-        }
+        function yearToX(year) { return ((year - viewLeft) / (viewRight - viewLeft)) * canvas.width; }
+        function xToYear(x) { return viewLeft + (x / canvas.width) * (viewRight - viewLeft); }
 
         function dateToYearDecimal(dateString) {
             const date = new Date(dateString);
             const year = date.getFullYear();
             const start = new Date(year, 0, 1);
             const end = new Date(year + 1, 0, 1);
-            const progress = (date - start) / (end - start);
-            return year + progress;
+            return year + (date - start) / (end - start);
         }
 
-        // 日記・SNSリンク保存
         function saveRecord(e) {
             e.preventDefault();
             const dateVal = document.getElementById('inputDate').value;
@@ -207,15 +198,9 @@
             const yearDecimal = dateToYearDecimal(dateVal);
             const isUrl = textVal.startsWith('http://') || textVal.startsWith('https://');
 
-            userRecords.push({
-                date: dateVal,
-                year: yearDecimal,
-                text: textVal,
-                isUrl: isUrl
-            });
+            userRecords.push({ date: dateVal, year: yearDecimal, text: textVal, isUrl: isUrl });
             localStorage.setItem('chronos_user_records', JSON.stringify(userRecords));
 
-            // 未解放の世界史を探す
             const lockedIds = [];
             for (let i = 0; i < HISTORICAL_MASTER_DB.length; i++) {
                 if (!unlockedHistoryIds.includes(i)) lockedIds.push(i);
@@ -224,30 +209,31 @@
             if (lockedIds.length > 0) {
                 const randomId = lockedIds[Math.floor(Math.random() * lockedIds.length)];
                 unlockedHistoryIds.push(randomId);
-                
-                // 🧠 ② 新着IDを更新・永続化（次の記入があるまでこのイベントが青く光る）
                 latestUnlockedId = randomId;
                 localStorage.setItem('chronos_latest_unlocked_id', latestUnlockedId);
                 localStorage.setItem('chronos_unlocked_history', JSON.stringify(unlockedHistoryIds));
                 
                 alert(`あなたの1日が歴史に刻まれました。\n同時に、新着の史実「${HISTORICAL_MASTER_DB[randomId].label}」が青く灯りました！`);
-                
-                // 新しい史実の場所にカメラを自動ジャンプさせる
                 targetLeft = HISTORICAL_MASTER_DB[randomId].year - 15;
                 targetRight = HISTORICAL_MASTER_DB[randomId].year + 15;
             } else {
-                alert(`あなたの1日が歴史に刻まれました！\n（すべての人類史がすでに解放されています）`);
+                alert(`あなたの1日が歴史に刻まれました！`);
                 targetLeft = yearDecimal - 1;
                 targetRight = yearDecimal + 1;
             }
-
             document.getElementById('inputText').value = '';
         }
 
-        // 3Dミニマップ描画
+        // 💡 修正：3Dミニマップ描画ロジックの描画バグ（座標がNaNになる可能性）を徹底ガード
         function draw3DMinimap() {
+            // 安全対策：もしサイズが0なら強制的に再設定
+            if (mCanvas.width === 0 || mCanvas.height === 0) {
+                mCanvas.width = 296;
+                mCanvas.height = 140;
+            }
+
             mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height);
-            const currentRange = viewRight - viewLeft;
+            const currentRange = Math.max(0.001, viewRight - viewLeft);
             const zoomRatio = TOTAL_SPAN / currentRange;
             const cX = mCanvas.width / 2;
             const cY = mCanvas.height / 2;
@@ -276,6 +262,7 @@
                 document.getElementById('minimap-mode-title').innerText = `3D TIME VORTEX (×${Math.floor(zoomRatio).toLocaleString()})`;
                 const segments = 120;
                 
+                // 3Dトンネルの描画
                 for (let i = segments; i >= 0; i--) {
                     const z = i / segments;
                     const perspective = 1 / (z + 0.1); 
@@ -284,12 +271,14 @@
                     const x = cX + Math.cos(angle) * baseRadius * (perspective * 0.2);
                     const y = cY + Math.sin(angle) * baseRadius * (perspective * 0.2);
                     const alpha = (1 - z) * 0.4;
+                    
                     mCtx.fillStyle = `rgba(75, 85, 99, ${alpha})`;
                     mCtx.beginPath();
-                    mCtx.arc(x, y, 1.5 * perspective * 0.1, 0, Math.PI * 2);
+                    mCtx.arc(x, y, Math.max(0.1, 1.5 * perspective * 0.1), 0, Math.PI * 2);
                     mCtx.fill();
                 }
 
+                // 自分の現在地の描画
                 const centerProgress = (viewLeft - START_YEAR) / TOTAL_SPAN;
                 const myZ = Math.min(0.95, 1 - (15 / zoomRatio));
                 const myPerspective = 1 / (myZ + 0.1);
@@ -299,14 +288,13 @@
                 const indicatorY = cY + Math.sin(myAngle) * myBaseRadius * (myPerspective * 0.2);
 
                 mCtx.beginPath();
-                mCtx.arc(indicatorX, indicatorY, (3 + Math.sin(Date.now() / 150) * 1.5) * (myPerspective * 0.15), 0, Math.PI * 2);
+                mCtx.arc(indicatorX, indicatorY, Math.max(1, (3 + Math.sin(Date.now() / 150) * 1.5) * (myPerspective * 0.15)), 0, Math.PI * 2);
                 mCtx.strokeStyle = '#60a5fa';
                 mCtx.lineWidth = 1.5;
                 mCtx.stroke();
             }
         }
 
-        // メイン描画・更新ループ
         function draw() {
             viewLeft += (targetLeft - viewLeft) * EASE_FACTOR;
             viewRight += (targetRight - viewRight) * EASE_FACTOR;
@@ -319,7 +307,6 @@
             const midY = canvas.height / 2;
             const currentRange = viewRight - viewLeft;
 
-            // タイムラインのベース軸
             ctx.beginPath();
             ctx.strokeStyle = 'rgba(75, 85, 99, 0.3)';
             ctx.lineWidth = 2;
@@ -327,11 +314,9 @@
             ctx.lineTo(canvas.width, midY);
             ctx.stroke();
 
-            // 1. 解放されている世界史データの描画
             unlockedHistoryIds.forEach(id => {
                 const event = HISTORICAL_MASTER_DB[id];
                 const x = yearToX(event.year);
-
                 if (x < -150 || x > canvas.width + 150) return;
 
                 let alpha = 1;
@@ -339,18 +324,14 @@
                 else if (currentRange > 200000 && event.year > -5000) alpha = 0.1; 
 
                 if (alpha <= 0) return;
-
-                // 🧠 ② 修正：このイベントが「新着のイベント」であるか判定
                 const isLatestNewEvent = (id === latestUnlockedId);
 
                 ctx.beginPath();
                 ctx.arc(x, midY, isLatestNewEvent ? 6 : 4, 0, Math.PI * 2);
                 
-                // 🧠 ② 新着の場合はユーザーと同じ鮮やかな青「#3b82f6」にし、脈動パルスを追加
                 if (isLatestNewEvent) {
-                    const pulseGlow = 10 + Math.sin(Date.now() / 100) * 6;
                     ctx.fillStyle = `rgba(59, 130, 246, ${alpha})`;
-                    ctx.shadowBlur = pulseGlow;
+                    ctx.shadowBlur = 10 + Math.sin(Date.now() / 100) * 6;
                     ctx.shadowColor = '#3b82f6';
                 } else {
                     ctx.fillStyle = `rgba(243, 244, 246, ${alpha})`;
@@ -363,17 +344,14 @@
                 ctx.fillStyle = isLatestNewEvent ? `rgba(147, 197, 253, ${alpha})` : `rgba(156, 163, 175, ${alpha * 0.8})`;
                 ctx.font = '10px monospace';
                 ctx.textAlign = 'center';
-                const yearLabel = event.year < 0 ? `${Math.abs(event.year).toLocaleString()}年前` : `西暦${event.year}年`;
-                ctx.fillText(yearLabel, x, midY + 25);
+                ctx.fillText(event.year < 0 ? `${Math.abs(event.year).toLocaleString()}年前` : `西暦${event.year}年`, x, midY + 25);
 
                 ctx.fillStyle = isLatestNewEvent ? `rgba(96, 165, 250, ${alpha})` : `rgba(229, 231, 235, ${alpha})`;
-                ctx.font = isLatestNewEvent ? 'bold 12px sans-serif' : '12px sans-serif';
+                ctx.font = '12px sans-serif';
                 ctx.fillText(event.label + (isLatestNewEvent ? " (NEW)" : ""), x, midY - 20);
             });
 
-            // 2. ユーザー日記・SNSデータの描画
             linkContainer.innerHTML = '';
-
             userRecords.forEach(record => {
                 const x = yearToX(record.year);
                 if (x < -200 || x > canvas.width + 200) return;
@@ -396,19 +374,13 @@
                     ctx.textAlign = 'center';
                     ctx.fillText(record.date, x, midY + 42);
 
-                    ctx.fillStyle = '#93c5fd';
-                    ctx.font = 'italic 12px sans-serif';
-                    
                     if (record.isUrl) {
                         const btn = document.createElement('a');
-                        btn.href = record.text;
-                        btn.target = '_blank';
-                        btn.className = 'timeline-link-btn';
-                        btn.innerText = 'SNS投稿を表示';
-                        btn.style.left = `${x - 35}px`;
-                        btn.style.top = `${midY - 45}px`;
+                        btn.href = record.text; btn.target = '_blank'; btn.className = 'timeline-link-btn';
+                        btn.innerText = 'SNS投稿を表示'; btn.style.left = `${x - 35}px`; btn.style.top = `${midY - 45}px`;
                         linkContainer.appendChild(btn);
                     } else {
+                        ctx.fillStyle = '#93c5fd'; ctx.font = 'italic 12px sans-serif';
                         ctx.fillText(record.text, x, midY - 40);
                     }
                 }
@@ -421,13 +393,8 @@
         }
 
         function jumpTo(targetYear) {
-            if (targetYear === 2026) {
-                targetLeft = 2024;
-                targetRight = 2027;
-            } else {
-                targetLeft = START_YEAR;
-                targetRight = END_YEAR;
-            }
+            if (targetYear === 2026) { targetLeft = 2024; targetRight = 2027; }
+            else { targetLeft = START_YEAR; targetRight = END_YEAR; }
         }
 
         window.addEventListener('wheel', (e) => {
@@ -445,25 +412,18 @@
         });
 
         canvas.addEventListener('mousedown', (e) => {
-            isDragging = true;
-            startX = e.clientX;
-            originalTargetLeft = targetLeft;
-            originalTargetRight = targetRight;
+            isDragging = true; startX = e.clientX;
+            originalTargetLeft = targetLeft; originalTargetRight = targetRight;
         });
 
         window.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             const currentTargetRange = originalTargetRight - originalTargetLeft;
-            const yearsPerPixel = currentTargetRange / canvas.width;
-            const deltaX = e.clientX - startX;
-            const deltaYears = deltaX * yearsPerPixel;
-
-            targetLeft = originalTargetLeft - deltaYears;
-            targetRight = originalTargetRight - deltaYears;
+            targetLeft = originalTargetLeft - (e.clientX - startX) * (currentTargetRange / canvas.width);
+            targetRight = originalTargetRight - (e.clientX - startX) * (currentTargetRange / canvas.width);
         });
 
         window.addEventListener('mouseup', () => { isDragging = false; });
-
         requestAnimationFrame(draw);
     </script>
 </body>
