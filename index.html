@@ -2,57 +2,67 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chronos Deep - 40万年日記</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>40万年日記</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #030712; font-family: 'Helvetica Neue', Arial, sans-serif; color: #f3f4f6; user-select: none; }
+        body, html { width: 100%; height: 100%; overflow: hidden; background-color: #030712; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #f3f4f6; user-select: none; -webkit-user-select: none; }
         
         #canvas-container { width: 100%; height: 100%; position: relative; }
         #timelineCanvas { display: block; width: 100%; height: 100%; cursor: grab; }
         #timelineCanvas:active { cursor: grabbing; }
 
-        /* 全体を覆うUIレイヤー */
-        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; padding: 24px; display: flex; flex-direction: row; justify-content: space-between; }
+        /* 全体を覆うUIレイヤー：スマホのタッチ操作を邪魔しない */
+        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; }
         .interactive { pointer-events: auto; }
 
-        /* 左側：入力パネル */
-        .left-zone { width: 340px; display: flex; flex-direction: column; gap: 16px; justify-content: flex-start; }
-        
-        header h1 { font-size: 1.5rem; font-weight: 300; letter-spacing: 0.2em; color: #9ca3af; text-shadow: 0 0 10px rgba(156, 163, 175, 0.3); }
-        header p { font-size: 0.8rem; color: #4b5563; margin-top: 4px; }
+        /* ヘッダー */
+        header h1 { font-size: 1.25rem; font-weight: 300; letter-spacing: 0.15em; color: #9ca3af; text-shadow: 0 0 10px rgba(156, 163, 175, 0.3); }
+        header p { font-size: 0.7rem; color: #4b5563; margin-top: 2px; }
 
-        .input-panel { background: rgba(11, 15, 26, 0.85); border: 1px solid rgba(75, 85, 99, 0.3); border-radius: 6px; padding: 16px; backdrop-filter: blur(8px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .panel-title { font-size: 0.8rem; letter-spacing: 0.1em; color: #9ca3af; margin-bottom: 12px; border-bottom: 1px solid rgba(75, 85, 99, 0.2); padding-bottom: 6px; }
+        /* スマート入力パネル（スマホではアコーディオン開閉式に） */
+        .input-panel { background: rgba(11, 15, 26, 0.9); border: 1px solid rgba(75, 85, 99, 0.4); border-radius: 8px; padding: 12px; width: 100%; max-width: 320px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.6); margin-top: 10px; transition: all 0.3s ease; }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .panel-title { font-size: 0.75rem; letter-spacing: 0.1em; color: #9ca3af; font-weight: bold; }
+        .toggle-icon { font-size: 0.75rem; color: #6b7280; transition: transform 0.3s; }
         
-        .form-group { margin-bottom: 10px; }
-        .form-group label { display: block; font-size: 0.7rem; color: #6b7280; margin-bottom: 4px; letter-spacing: 0.05em; }
-        .form-group input, .form-group textarea { width: 100%; background: rgba(3, 7, 18, 0.6); border: 1px solid rgba(75, 85, 99, 0.4); border-radius: 4px; color: #f3f4f6; padding: 8px 10px; font-size: 0.8rem; transition: all 0.3s ease; }
-        .form-group input:focus, .form-group textarea:focus { outline: none; border-color: #60a5fa; box-shadow: 0 0 10px rgba(96, 165, 250, 0.2); }
-        
-        .submit-btn { width: 100%; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid rgba(96, 165, 250, 0.4); color: #93c5fd; padding: 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; letter-spacing: 0.1em; font-weight: bold; transition: all 0.3s ease; }
-        .submit-btn:hover { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #fff; border-color: #fff; box-shadow: 0 0 15px rgba(37, 99, 235, 0.4); text-shadow: 0 0 5px rgba(255,255,255,0.5); }
+        .panel-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; margin-top: 0; }
+        .panel-content.open { max-height: 300px; margin-top: 12px; }
 
-        /* 右側：HUDと3Dミニマップ */
-        .right-zone { width: 340px; display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; }
+        .form-group { margin-bottom: 8px; }
+        .form-group label { display: block; font-size: 0.65rem; color: #6b7280; margin-bottom: 3px; }
+        .form-group input, .form-group textarea { width: 100%; background: rgba(3, 7, 18, 0.7); border: 1px solid rgba(75, 85, 99, 0.5); border-radius: 4px; color: #f3f4f6; padding: 6px 8px; font-size: 0.8rem; }
         
-        .hud { background: rgba(3, 7, 18, 0.7); padding: 12px 20px; border-radius: 4px; border-left: 2px solid #374151; font-size: 0.8rem; font-family: monospace; color: #9ca3af; white-space: nowrap; backdrop-filter: blur(4px); }
-        .hud span { color: #f3f4f6; font-weight: bold; }
+        .submit-btn { width: 100%; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid rgba(96, 165, 250, 0.5); color: #93c5fd; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; letter-spacing: 0.05em; }
 
-        .bottom-right-zone { display: flex; flex-direction: column; align-items: flex-end; gap: 16px; }
-        .controls { display: flex; gap: 12px; }
-        
-        button.ui-btn { background: rgba(17, 24, 39, 0.7); border: 1px solid rgba(75, 85, 99, 0.5); color: #e5e7eb; padding: 12px 20px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; letter-spacing: 0.1em; transition: all 0.3s ease; backdrop-filter: blur(4px); white-space: nowrap; }
-        button.ui-btn:hover { background: rgba(31, 41, 55, 0.9); border-color: #9ca3af; box-shadow: 0 0 15px rgba(156, 163, 175, 0.2); text-shadow: 0 0 5px #fff; }
+        /* 上部中央の視界範囲インジケーター（HUD） */
+        .hud { background: rgba(3, 7, 18, 0.75); padding: 8px 14px; border-radius: 20px; border: 1px solid rgba(55, 65, 81, 0.5); font-size: 0.7rem; font-family: monospace; color: #9ca3af; align-self: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); backdrop-filter: blur(4px); margin-top: 4px; }
+        .hud span { color: #60a5fa; }
 
-        .minimap-container { background: rgba(11, 15, 26, 0.85); border: 1px solid rgba(75, 85, 99, 0.3); border-radius: 4px; padding: 12px; width: 320px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); backdrop-filter: blur(4px); }
-        .minimap-title { font-size: 0.65rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 8px; font-family: monospace; }
-        
-        /* 💡 修正：ミニマップのCanvasサイズをCSSでも明示的に固定 */
-        #minimapCanvas { display: block; background: rgba(3, 7, 18, 0.7); border-radius: 2px; width: 296px; height: 140px; }
+        /* 右下：ミニマップとコントロール（スマホでは縦に並べる） */
+        .bottom-right-zone { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; width: 100%; max-width: 320px; align-self: flex-end; }
+        .controls { display: flex; gap: 8px; width: 100%; }
+        button.ui-btn { flex: 1; background: rgba(17, 24, 39, 0.8); border: 1px solid rgba(75, 85, 99, 0.5); color: #e5e7eb; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: all 0.2s; backdrop-filter: blur(4px); text-align: center; }
 
-        .timeline-link-btn { position: absolute; background: rgba(37, 99, 235, 0.8); border: 1px solid #60a5fa; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; cursor: pointer; text-decoration: none; pointer-events: auto; z-index: 10; transition: all 0.2s; }
-        .timeline-link-btn:hover { background: #2563eb; box-shadow: 0 0 8px #60a5fa; }
+        .minimap-container { background: rgba(11, 15, 26, 0.9); border: 1px solid rgba(75, 85, 99, 0.4); border-radius: 8px; padding: 10px; width: 100%; box-shadow: 0 4px 20px rgba(0,0,0,0.6); backdrop-filter: blur(4px); }
+        .minimap-title { font-size: 0.6rem; color: #6b7280; letter-spacing: 0.1em; margin-bottom: 6px; font-family: monospace; }
+        #minimapCanvas { display: block; background: rgba(3, 7, 18, 0.7); border-radius: 4px; width: 100%; height: 90px; }
+
+        /* SNSリンクボタン（スマホ用に押しやすく拡大） */
+        .timeline-link-btn { position: absolute; background: rgba(37, 99, 235, 0.9); border: 1px solid #60a5fa; color: white; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; cursor: pointer; text-decoration: none; pointer-events: auto; z-index: 10; box-shadow: 0 2px 8px rgba(37,99,235,0.4); }
+
+        /* 横画面やPC用の調整 */
+        @media (min-width: 768px) {
+            .ui-layer { flex-direction: row; padding: 24px; }
+            .left-zone { display: flex; flex-direction: column; gap: 16px; }
+            .input-panel { max-width: 340px; padding: 16px; }
+            .panel-content { max-height: none !important; margin-top: 12px; }
+            .toggle-icon { display: none; }
+            .hud { align-self: flex-start; font-size: 0.8rem; padding: 12px 20px; border-radius: 4px; border: none; border-left: 2px solid #374151; margin-top: 0; }
+            .bottom-right-zone { width: 320px; }
+            button.ui-btn { font-size: 0.8rem; padding: 12px; }
+            #minimapCanvas { height: 130px; }
+        }
     </style>
 </head>
 <body>
@@ -62,44 +72,49 @@
         <div id="link-buttons-container"></div>
         
         <div class="ui-layer">
-            <div class="left-zone">
+            <!-- 左側（スマホでは上部）：タイトルと折りたたみ入力パネル -->
+            <div style="display: flex; flex-direction: column; pointer-events: auto;" class="interactive">
                 <header>
                     <h1>40万年日記</h1>
                     <p>人類史の深淵と、個の記録</p>
                 </header>
 
-                <div class="input-panel interactive">
-                    <div class="panel-title">NEW RECORD</div>
-                    <form id="diaryForm" onsubmit="saveRecord(event)">
-                        <div class="form-group">
-                            <label for="inputDate">日付</label>
-                            <input type="date" id="inputDate" required value="2026-07-19">
-                        </div>
-                        <div class="form-group">
-                            <label for="inputText">日記の本文 または SNS投稿URL</label>
-                            <textarea id="inputText" rows="3" placeholder="今日あったこと、もしくはX等の投稿URLをペースト..." required></textarea>
-                        </div>
-                        <button type="submit" class="submit-btn">時空に刻む</button>
-                    </form>
+                <div class="input-panel" id="inputPanel">
+                    <div class="panel-header" onclick="togglePanel()">
+                        <div class="panel-title">🖋️ NEW RECORD (タップで入力)</div>
+                        <div class="toggle-icon" id="toggleIcon">▼</div>
+                    </div>
+                    <div class="panel-content" id="panelContent">
+                        <form id="diaryForm" onsubmit="saveRecord(event)">
+                            <div class="form-group">
+                                <label for="inputDate">日付</label>
+                                <input type="date" id="inputDate" required value="2026-07-19">
+                            </div>
+                            <div class="form-group">
+                                <label for="inputText">本文 または SNS投稿URL</label>
+                                <textarea id="inputText" rows="3" placeholder="今日あったこと、またはURLをペースト..." required></textarea>
+                            </div>
+                            <button type="submit" class="submit-btn">時空に刻む</button>
+                        </form>
+                    </div>
                 </div>
             </div>
 
-            <div class="right-zone">
-                <div class="hud">
-                    VIEW RANGE: <span id="hud-start">400,000年前</span> 〜 <span id="hud-end">現在</span>
+            <!-- 中央上部（スマホ用）：現在の表示範囲 -->
+            <div class="hud">
+                VIEW: <span id="hud-start">400,000年前</span> 〜 <span id="hud-end">現在</span>
+            </div>
+
+            <!-- 右側（スマホでは下部）：3Dミニマップとボタン -->
+            <div class="bottom-right-zone interactive">
+                <div class="minimap-container">
+                    <div class="minimap-title" id="minimap-mode-title">TOTAL HISTORY SCALE</div>
+                    <canvas id="minimapCanvas"></canvas>
                 </div>
 
-                <div class="bottom-right-zone interactive">
-                    <div class="minimap-container">
-                        <div class="minimap-title" id="minimap-mode-title">TOTAL HISTORY SCALE</div>
-                        <!-- 💡 修正：内部的な解像度（ピクセル数）をHTML属性でも再度固定 -->
-                        <canvas id="minimapCanvas" width="296" height="140"></canvas>
-                    </div>
-
-                    <div class="controls">
-                        <button class="ui-btn" onclick="jumpTo(2026)">現在地へジャンプ</button>
-                        <button class="ui-btn" onclick="jumpTo(-200000)">全景へ戻る</button>
-                    </div>
+                <div class="controls">
+                    <button class="ui-btn" onclick="jumpTo(2026)">現在地へ</button>
+                    <button class="ui-btn" onclick="jumpTo(-200000)">全景へ</button>
                 </div>
             </div>
         </div>
@@ -118,9 +133,9 @@
             { year: -170000, label: "衣服の着用の始まり（衣服の起源）" },
             { year: -70000, label: "トバ・カタストロフ（人類の絶滅危機）" },
             { year: -50000, label: "認知革命（言語や集団シンボルの誕生）" },
-            { year: -4000, label: "最古の cave 壁画（アルタミラ・ラスコー）" },
+            { year: -40000, label: "最古の洞窟壁画（アルタミラ・ラスコー）" },
             { year: -10000, label: "最古の農耕の開始（肥沃な三日月地帯）" },
-            { year: -5500, label: "「車輪」の発明（メソポタミア）" },
+            { year: -5500, label: "「车輪」の発明（メソポタミア）" },
             { year: -3000, label: "メソポタミア・楔形文字の発明" },
             { year: -2560, label: "ギザの大ピラミッド建設" },
             { year: -1200, label: "鉄器時代の始まり（製鉄術の普及）" },
@@ -155,38 +170,48 @@
         
         let viewLeft = START_YEAR;
         let viewRight = END_YEAR;
-
         let targetLeft = viewLeft;
         let targetRight = viewRight;
-        const EASE_FACTOR = 0.1;
+        const EASE_FACTOR = 0.12;
 
         let isDragging = false;
         let startX = 0;
         let originalTargetLeft = 0;
         let originalTargetRight = 0;
 
+        // スマホのピンチズーム用状態管理
+        let initialTouchDist = 0;
+
         document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
+
+        // 🧠 スマホの折りたたみパネル制御
+        function togglePanel() {
+            if (window.innerWidth >= 768) return; // PCは常時開く
+            const content = document.getElementById('panelContent');
+            const icon = document.getElementById('toggleIcon');
+            content.classList.toggle('open');
+            icon.style.transform = content.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
+        }
 
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            
-            // 💡 修正：ロード時のサイズ誤認を防ぐため、リサイズ時にもミニマップのピクセル数を厳密に再固定
-            mCanvas.width = 296;
-            mCanvas.height = 140;
+            // レスポンシブにミニマップの実ピクセルを同期
+            const container = document.querySelector('.minimap-container');
+            if(container) {
+                mCanvas.width = container.clientWidth - 20;
+                mCanvas.height = window.innerWidth >= 768 ? 130 : 90;
+            }
         }
         window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+        setTimeout(resizeCanvas, 100); // ロード時のサイズ確定を保証
 
         function yearToX(year) { return ((year - viewLeft) / (viewRight - viewLeft)) * canvas.width; }
         function xToYear(x) { return viewLeft + (x / canvas.width) * (viewRight - viewLeft); }
 
         function dateToYearDecimal(dateString) {
             const date = new Date(dateString);
-            const year = date.getFullYear();
-            const start = new Date(year, 0, 1);
-            const end = new Date(year + 1, 0, 1);
-            return year + (date - start) / (end - start);
+            return date.getFullYear() + (date - new Date(date.getFullYear(), 0, 1)) / (new Date(date.getFullYear() + 1, 0, 1) - new Date(date.getFullYear(), 0, 1));
         }
 
         function saveRecord(e) {
@@ -201,10 +226,7 @@
             userRecords.push({ date: dateVal, year: yearDecimal, text: textVal, isUrl: isUrl });
             localStorage.setItem('chronos_user_records', JSON.stringify(userRecords));
 
-            const lockedIds = [];
-            for (let i = 0; i < HISTORICAL_MASTER_DB.length; i++) {
-                if (!unlockedHistoryIds.includes(i)) lockedIds.push(i);
-            }
+            const lockedIds = HISTORICAL_MASTER_DB.map((_, i) => i).filter(i => !unlockedHistoryIds.includes(i));
 
             if (lockedIds.length > 0) {
                 const randomId = lockedIds[Math.floor(Math.random() * lockedIds.length)];
@@ -213,25 +235,19 @@
                 localStorage.setItem('chronos_latest_unlocked_id', latestUnlockedId);
                 localStorage.setItem('chronos_unlocked_history', JSON.stringify(unlockedHistoryIds));
                 
-                alert(`あなたの1日が歴史に刻まれました。\n同時に、新着の史実「${HISTORICAL_MASTER_DB[randomId].label}」が青く灯りました！`);
+                alert(`歴史に刻まれました。\n新着史実「${HISTORICAL_MASTER_DB[randomId].label}」解放！`);
                 targetLeft = HISTORICAL_MASTER_DB[randomId].year - 15;
                 targetRight = HISTORICAL_MASTER_DB[randomId].year + 15;
             } else {
-                alert(`あなたの1日が歴史に刻まれました！`);
+                alert(`歴史に刻まれました！`);
                 targetLeft = yearDecimal - 1;
                 targetRight = yearDecimal + 1;
             }
             document.getElementById('inputText').value = '';
+            if (window.innerWidth < 768) togglePanel(); // スマホでは自動で閉じる
         }
 
-        // 💡 修正：3Dミニマップ描画ロジックの描画バグ（座標がNaNになる可能性）を徹底ガード
         function draw3DMinimap() {
-            // 安全対策：もしサイズが0なら強制的に再設定
-            if (mCanvas.width === 0 || mCanvas.height === 0) {
-                mCanvas.width = 296;
-                mCanvas.height = 140;
-            }
-
             mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height);
             const currentRange = Math.max(0.001, viewRight - viewLeft);
             const zoomRatio = TOTAL_SPAN / currentRange;
@@ -239,59 +255,42 @@
             const cY = mCanvas.height / 2;
 
             if (zoomRatio < 15) {
-                document.getElementById('minimap-mode-title').innerText = "LINEAR SCALE (全景マップ)";
+                document.getElementById('minimap-mode-title').innerText = "LINEAR SCALE (全景)";
                 const midY = mCanvas.height / 2;
-                mCtx.beginPath();
-                mCtx.strokeStyle = 'rgba(75, 85, 99, 0.4)';
-                mCtx.lineWidth = 2;
-                mCtx.moveTo(10, midY);
-                mCtx.lineTo(mCanvas.width - 10, midY);
-                mCtx.stroke();
+                mCtx.beginPath(); mCtx.strokeStyle = 'rgba(75, 85, 99, 0.4)'; mCtx.lineWidth = 2;
+                mCtx.moveTo(10, midY); mCtx.lineTo(mCanvas.width - 10, midY); mCtx.stroke();
 
                 const leftRatio = (viewLeft - START_YEAR) / TOTAL_SPAN;
                 const rightRatio = (viewRight - START_YEAR) / TOTAL_SPAN;
-                const availableWidth = mCanvas.width - 20;
-                const x1 = 10 + leftRatio * availableWidth;
-                const x2 = 10 + rightRatio * availableWidth;
-
-                mCtx.fillStyle = 'rgba(243, 244, 246, 0.15)';
-                mCtx.strokeStyle = 'rgba(243, 244, 246, 0.8)';
-                mCtx.fillRect(x1, midY - 6, Math.max(2, x2 - x1), 12);
-                mCtx.strokeRect(x1, midY - 6, Math.max(2, x2 - x1), 12);
+                const w = mCanvas.width - 20;
+                mCtx.fillStyle = 'rgba(243, 244, 246, 0.15)'; mCtx.strokeStyle = 'rgba(243, 244, 246, 0.8)';
+                mCtx.fillRect(10 + leftRatio * w, midY - 6, Math.max(2, (rightRatio - leftRatio) * w), 12);
+                mCtx.strokeRect(10 + leftRatio * w, midY - 6, Math.max(2, (rightRatio - leftRatio) * w), 12);
             } else {
-                document.getElementById('minimap-mode-title').innerText = `3D TIME VORTEX (×${Math.floor(zoomRatio).toLocaleString()})`;
-                const segments = 120;
+                document.getElementById('minimap-mode-title').innerText = `3D VORTEX (×${Math.floor(zoomRatio).toLocaleString()})`;
+                const segments = window.innerWidth >= 768 ? 120 : 80; // スマホでは軽量化
                 
-                // 3Dトンネルの描画
                 for (let i = segments; i >= 0; i--) {
                     const z = i / segments;
                     const perspective = 1 / (z + 0.1); 
                     const angle = z * Math.PI * 6 - (Math.log10(zoomRatio) * 0.8);
-                    const baseRadius = 50 * (1 - z * 0.8);
+                    const baseRadius = (window.innerWidth >= 768 ? 50 : 35) * (1 - z * 0.8);
                     const x = cX + Math.cos(angle) * baseRadius * (perspective * 0.2);
                     const y = cY + Math.sin(angle) * baseRadius * (perspective * 0.2);
-                    const alpha = (1 - z) * 0.4;
-                    
-                    mCtx.fillStyle = `rgba(75, 85, 99, ${alpha})`;
-                    mCtx.beginPath();
-                    mCtx.arc(x, y, Math.max(0.1, 1.5 * perspective * 0.1), 0, Math.PI * 2);
-                    mCtx.fill();
+                    mCtx.fillStyle = `rgba(75, 85, 99, ${(1 - z) * 0.4})`;
+                    mCtx.beginPath(); mCtx.arc(x, y, Math.max(0.1, 1.5 * perspective * 0.1), 0, Math.PI * 2); mCtx.fill();
                 }
 
-                // 自分の現在地の描画
                 const centerProgress = (viewLeft - START_YEAR) / TOTAL_SPAN;
                 const myZ = Math.min(0.95, 1 - (15 / zoomRatio));
                 const myPerspective = 1 / (myZ + 0.1);
                 const myAngle = myZ * Math.PI * 6 - (Math.log10(zoomRatio) * 0.8) + (centerProgress * 2);
-                const myBaseRadius = 50 * (1 - myZ * 0.8);
+                const myBaseRadius = (window.innerWidth >= 768 ? 50 : 35) * (1 - myZ * 0.8);
                 const indicatorX = cX + Math.cos(myAngle) * myBaseRadius * (myPerspective * 0.2);
                 const indicatorY = cY + Math.sin(myAngle) * myBaseRadius * (myPerspective * 0.2);
 
-                mCtx.beginPath();
-                mCtx.arc(indicatorX, indicatorY, Math.max(1, (3 + Math.sin(Date.now() / 150) * 1.5) * (myPerspective * 0.15)), 0, Math.PI * 2);
-                mCtx.strokeStyle = '#60a5fa';
-                mCtx.lineWidth = 1.5;
-                mCtx.stroke();
+                mCtx.beginPath(); mCtx.arc(indicatorX, indicatorY, Math.max(1, (3 + Math.sin(Date.now() / 150) * 1.5) * (myPerspective * 0.15)), 0, Math.PI * 2);
+                mCtx.strokeStyle = '#60a5fa'; mCtx.lineWidth = 1.5; mCtx.stroke();
             }
         }
 
@@ -301,19 +300,16 @@
 
             draw3DMinimap();
 
-            ctx.fillStyle = '#030712';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#030712'; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const midY = canvas.height / 2;
+            // 🧠 修正：スマホ画面（特に縦画面）で文字が見やすくなるよう、時間軸の基準線を中央（0.5）からやや下（0.62）へ配置
+            const midY = canvas.height * (window.innerWidth >= 768 ? 0.5 : 0.62);
             const currentRange = viewRight - viewLeft;
 
-            ctx.beginPath();
-            ctx.strokeStyle = 'rgba(75, 85, 99, 0.3)';
-            ctx.lineWidth = 2;
-            ctx.moveTo(0, midY);
-            ctx.lineTo(canvas.width, midY);
-            ctx.stroke();
+            ctx.beginPath(); ctx.strokeStyle = 'rgba(75, 85, 99, 0.3)'; ctx.lineWidth = 2;
+            ctx.moveTo(0, midY); ctx.lineTo(canvas.width, midY); ctx.stroke();
 
+            // 歴史イベント描画
             unlockedHistoryIds.forEach(id => {
                 const event = HISTORICAL_MASTER_DB[id];
                 const x = yearToX(event.year);
@@ -326,66 +322,65 @@
                 if (alpha <= 0) return;
                 const isLatestNewEvent = (id === latestUnlockedId);
 
-                ctx.beginPath();
-                ctx.arc(x, midY, isLatestNewEvent ? 6 : 4, 0, Math.PI * 2);
-                
+                ctx.beginPath(); ctx.arc(x, midY, isLatestNewEvent ? 6 : 4, 0, Math.PI * 2);
                 if (isLatestNewEvent) {
                     ctx.fillStyle = `rgba(59, 130, 246, ${alpha})`;
-                    ctx.shadowBlur = 10 + Math.sin(Date.now() / 100) * 6;
-                    ctx.shadowColor = '#3b82f6';
+                    ctx.shadowBlur = 10 + Math.sin(Date.now() / 100) * 6; ctx.shadowColor = '#3b82f6';
                 } else {
-                    ctx.fillStyle = `rgba(243, 244, 246, ${alpha})`;
-                    ctx.shadowBlur = 6;
-                    ctx.shadowColor = '#fff';
+                    ctx.fillStyle = `rgba(243, 244, 246, ${alpha})`; ctx.shadowBlur = 6; ctx.shadowColor = '#fff';
                 }
-                ctx.fill();
-                ctx.shadowBlur = 0;
+                ctx.fill(); ctx.shadowBlur = 0;
 
+                // スマホ用にフォントサイズを動的に調整
+                const isMobile = window.innerWidth < 768;
                 ctx.fillStyle = isLatestNewEvent ? `rgba(147, 197, 253, ${alpha})` : `rgba(156, 163, 175, ${alpha * 0.8})`;
-                ctx.font = '10px monospace';
+                ctx.font = isMobile ? '9px monospace' : '10px monospace';
                 ctx.textAlign = 'center';
-                ctx.fillText(event.year < 0 ? `${Math.abs(event.year).toLocaleString()}年前` : `西暦${event.year}年`, x, midY + 25);
+                ctx.fillText(event.year < 0 ? `${Math.abs(event.year).toLocaleString()}年前` : `西暦${event.year}年`, x, midY + (isMobile ? 20 : 25));
 
                 ctx.fillStyle = isLatestNewEvent ? `rgba(96, 165, 250, ${alpha})` : `rgba(229, 231, 235, ${alpha})`;
-                ctx.font = '12px sans-serif';
-                ctx.fillText(event.label + (isLatestNewEvent ? " (NEW)" : ""), x, midY - 20);
+                ctx.font = isMobile ? (isLatestNewEvent ? 'bold 10px sans-serif' : '10px sans-serif') : (isLatestNewEvent ? 'bold 12px sans-serif' : '12px sans-serif');
+                
+                // スマホ縦画面では長いテキストを交互に上下させて重なりを軽減
+                let textY = midY - (isMobile ? 15 : 20);
+                if (isMobile && !isLatestNewEvent && id % 2 === 0) textY = midY - 30;
+                ctx.fillText(event.label + (isLatestNewEvent ? " (NEW)" : ""), x, textY);
             });
 
+            // ユーザーデータ描画
             linkContainer.innerHTML = '';
-            userRecords.forEach(record => {
+            userRecords.forEach((record, index) => {
                 const x = yearToX(record.year);
                 if (x < -200 || x > canvas.width + 200) return;
 
-                let alpha = 1;
-                if (currentRange > 5000) alpha = 0.2;
-                if (currentRange > 50000) alpha = 0.05;
+                let alpha = currentRange > 50000 ? 0.05 : (currentRange > 5000 ? 0.2 : 1);
 
-                ctx.beginPath();
-                ctx.arc(x, midY, 6, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(59, 130, 246, ${alpha})`;
-                ctx.shadowBlur = 15;
-                ctx.shadowColor = '#3b82f6';
-                ctx.fill();
-                ctx.shadowBlur = 0;
+                ctx.beginPath(); ctx.arc(x, midY, 6, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(59, 130, 246, ${alpha})`; ctx.shadowBlur = 15; ctx.shadowColor = '#3b82f6'; ctx.fill(); ctx.shadowBlur = 0;
 
                 if (currentRange < 2000) {
-                    ctx.fillStyle = '#60a5fa';
-                    ctx.font = 'bold 11px monospace';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(record.date, x, midY + 42);
+                    const isMobile = window.innerWidth < 768;
+                    ctx.fillStyle = '#60a5fa'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
+                    ctx.fillText(record.date, x, midY + (isMobile ? 35 : 42));
 
                     if (record.isUrl) {
                         const btn = document.createElement('a');
                         btn.href = record.text; btn.target = '_blank'; btn.className = 'timeline-link-btn';
-                        btn.innerText = 'SNS投稿を表示'; btn.style.left = `${x - 35}px`; btn.style.top = `${midY - 45}px`;
+                        btn.innerText = '🔗 LINK'; 
+                        btn.style.left = `${x - 28}px`;
+                        btn.style.top = `${midY - (isMobile ? 40 : 45)}px`;
                         linkContainer.appendChild(btn);
                     } else {
-                        ctx.fillStyle = '#93c5fd'; ctx.font = 'italic 12px sans-serif';
-                        ctx.fillText(record.text, x, midY - 40);
+                        ctx.fillStyle = '#93c5fd'; ctx.font = isMobile ? '11px sans-serif' : '12px sans-serif';
+                        // 複数日記がある場合の縦軸の重なり回避
+                        let diaryY = midY - (isMobile ? 15 : 40);
+                        if(isMobile && index % 2 === 0) diaryY = midY - 26;
+                        ctx.fillText(record.text, x, diaryY);
                     }
                 }
             });
 
+            // HUD更新
             document.getElementById('hud-start').innerText = viewLeft < 0 ? `${Math.floor(Math.abs(viewLeft)).toLocaleString()}年前` : `西暦${Math.floor(viewLeft)}年`;
             document.getElementById('hud-end').innerText = viewRight < 0 ? `${Math.floor(Math.abs(viewRight)).toLocaleString()}年前` : `西暦${Math.floor(viewRight)}年`;
 
@@ -397,33 +392,69 @@
             else { targetLeft = START_YEAR; targetRight = END_YEAR; }
         }
 
-        window.addEventListener('wheel', (e) => {
-            const mouseYear = xToYear(e.clientX);
+        // 🧠 ズームロジック関数（PC/スマホ共通）
+        function applyZoom(zoomFactor, centerX) {
+            const mouseYear = xToYear(centerX);
             const currentRange = targetRight - targetLeft;
-            const zoomFactor = e.deltaY > 0 ? 1.3 : 0.7;
             const newRange = currentRange * zoomFactor;
 
-            if (newRange < 0.005 && e.deltaY < 0) return;
-            if (newRange > (END_YEAR - START_YEAR) * 1.5 && e.deltaY > 0) return;
+            if (newRange < 0.005 && zoomFactor < 1) return;
+            if (newRange > TOTAL_SPAN * 1.5 && zoomFactor > 1) return;
 
-            const ratio = e.clientX / canvas.width;
+            const ratio = centerX / canvas.width;
             targetLeft = mouseYear - newRange * ratio;
             targetRight = mouseYear + newRange * (1 - ratio);
+        }
+
+        // PC用マウスホイール
+        window.addEventListener('wheel', (e) => {
+            applyZoom(e.deltaY > 0 ? 1.3 : 0.7, e.clientX);
         });
 
+        // 🧠 スマホ用タッチイベント（ドラッグ＆2本指ピンチズーム対応）
+        canvas.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                isDragging = true; startX = e.touches[0].clientX;
+                originalTargetLeft = targetLeft; originalTargetRight = targetRight;
+            } else if (e.touches.length === 2) {
+                isDragging = false;
+                initialTouchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                originalTargetLeft = targetLeft; originalTargetRight = targetRight;
+            }
+        });
+
+        canvas.addEventListener('touchmove', (e) => {
+            if (isDragging && e.touches.length === 1) {
+                const currentTargetRange = originalTargetRight - originalTargetLeft;
+                const deltaX = e.touches[0].clientX - startX;
+                targetLeft = originalTargetLeft - deltaX * (currentTargetRange / canvas.width);
+                targetRight = originalTargetRight - deltaX * (currentTargetRange / canvas.width);
+            } else if (e.touches.length === 2) {
+                const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+                if (initialTouchDist > 0) {
+                    // ピンチイン・アウトの比率を計算
+                    const factor = initialTouchDist / dist;
+                    const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                    applyZoom(factor > 1 ? 1.08 : 0.92, centerX);
+                }
+            }
+        });
+
+        canvas.addEventListener('touchend', () => { isDragging = false; initialTouchDist = 0; });
+
+        // PC用ドラッグ
         canvas.addEventListener('mousedown', (e) => {
             isDragging = true; startX = e.clientX;
             originalTargetLeft = targetLeft; originalTargetRight = targetRight;
         });
-
         window.addEventListener('mousemove', (e) => {
             if (!isDragging) return;
             const currentTargetRange = originalTargetRight - originalTargetLeft;
             targetLeft = originalTargetLeft - (e.clientX - startX) * (currentTargetRange / canvas.width);
             targetRight = originalTargetRight - (e.clientX - startX) * (currentTargetRange / canvas.width);
         });
-
         window.addEventListener('mouseup', () => { isDragging = false; });
+
         requestAnimationFrame(draw);
     </script>
 </body>
