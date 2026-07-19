@@ -12,34 +12,38 @@
         #timelineCanvas { display: block; width: 100%; height: 100%; cursor: grab; }
         #timelineCanvas:active { cursor: grabbing; }
 
-        /* 全体を覆うUIレイヤー：スマホのタッチ操作を邪魔しない */
         .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; }
         .interactive { pointer-events: auto; }
 
-        /* ヘッダー */
+        /* 左側：スクロール可能なUIゾーン */
+        .left-zone { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 10px; justify-content: flex-start; max-height: 50%; overflow-y: auto; pointer-events: auto; }
+        /* スクロールバーの非表示（見た目の美しさ重視） */
+        .left-zone::-webkit-scrollbar { display: none; }
+        
         header h1 { font-size: 1.25rem; font-weight: 300; letter-spacing: 0.15em; color: #9ca3af; text-shadow: 0 0 10px rgba(156, 163, 175, 0.3); }
         header p { font-size: 0.7rem; color: #4b5563; margin-top: 2px; }
 
-        /* スマート入力パネル（スマホではアコーディオン開閉式に） */
-        .input-panel { background: rgba(11, 15, 26, 0.9); border: 1px solid rgba(75, 85, 99, 0.4); border-radius: 8px; padding: 12px; width: 100%; max-width: 320px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.6); margin-top: 10px; transition: all 0.3s ease; }
+        /* 入力パネル共通スタイル */
+        .input-panel { background: rgba(11, 15, 26, 0.9); border: 1px solid rgba(75, 85, 99, 0.4); border-radius: 8px; padding: 12px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
         .panel-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .panel-title { font-size: 0.75rem; letter-spacing: 0.1em; color: #9ca3af; font-weight: bold; }
         .toggle-icon { font-size: 0.75rem; color: #6b7280; transition: transform 0.3s; }
         
         .panel-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; margin-top: 0; }
-        .panel-content.open { max-height: 300px; margin-top: 12px; }
+        .panel-content.open { max-height: 400px; margin-top: 12px; }
 
         .form-group { margin-bottom: 8px; }
+        .form-group.row { display: flex; gap: 6px; }
         .form-group label { display: block; font-size: 0.65rem; color: #6b7280; margin-bottom: 3px; }
         .form-group input, .form-group textarea { width: 100%; background: rgba(3, 7, 18, 0.7); border: 1px solid rgba(75, 85, 99, 0.5); border-radius: 4px; color: #f3f4f6; padding: 6px 8px; font-size: 0.8rem; }
         
         .submit-btn { width: 100%; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid rgba(96, 165, 250, 0.5); color: #93c5fd; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; letter-spacing: 0.05em; }
 
-        /* 上部中央の視界範囲インジケーター（HUD） */
+        /* HUD */
         .hud { background: rgba(3, 7, 18, 0.75); padding: 8px 14px; border-radius: 20px; border: 1px solid rgba(55, 65, 81, 0.5); font-size: 0.7rem; font-family: monospace; color: #9ca3af; align-self: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); backdrop-filter: blur(4px); margin-top: 4px; }
         .hud span { color: #60a5fa; }
 
-        /* 右下：ミニマップとコントロール（スマホでは縦に並べる） */
+        /* 右下 */
         .bottom-right-zone { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; width: 100%; max-width: 320px; align-self: flex-end; }
         .controls { display: flex; gap: 8px; width: 100%; }
         button.ui-btn { flex: 1; background: rgba(17, 24, 39, 0.8); border: 1px solid rgba(75, 85, 99, 0.5); color: #e5e7eb; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: all 0.2s; backdrop-filter: blur(4px); text-align: center; }
@@ -48,14 +52,12 @@
         .minimap-title { font-size: 0.6rem; color: #6b7280; letter-spacing: 0.1em; margin-bottom: 6px; font-family: monospace; }
         #minimapCanvas { display: block; background: rgba(3, 7, 18, 0.7); border-radius: 4px; width: 100%; height: 90px; }
 
-        /* SNSリンクボタン（スマホ用に押しやすく拡大） */
         .timeline-link-btn { position: absolute; background: rgba(37, 99, 235, 0.9); border: 1px solid #60a5fa; color: white; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; cursor: pointer; text-decoration: none; pointer-events: auto; z-index: 10; box-shadow: 0 2px 8px rgba(37,99,235,0.4); }
 
-        /* 横画面やPC用の調整 */
         @media (min-width: 768px) {
             .ui-layer { flex-direction: row; padding: 24px; }
-            .left-zone { display: flex; flex-direction: column; gap: 16px; }
-            .input-panel { max-width: 340px; padding: 16px; }
+            .left-zone { max-width: 340px; max-height: none; overflow-y: visible; gap: 16px; }
+            .input-panel { padding: 16px; }
             .panel-content { max-height: none !important; margin-top: 12px; }
             .toggle-icon { display: none; }
             .hud { align-self: flex-start; font-size: 0.8rem; padding: 12px 20px; border-radius: 4px; border: none; border-left: 2px solid #374151; margin-top: 0; }
@@ -72,19 +74,20 @@
         <div id="link-buttons-container"></div>
         
         <div class="ui-layer">
-            <!-- 左側（スマホでは上部）：タイトルと折りたたみ入力パネル -->
-            <div style="display: flex; flex-direction: column; pointer-events: auto;" class="interactive">
+            <!-- 左側：各種入力パネル -->
+            <div class="left-zone">
                 <header>
                     <h1>40万年日記</h1>
                     <p>人類史の深淵と、個の記録</p>
                 </header>
 
-                <div class="input-panel" id="inputPanel">
-                    <div class="panel-header" onclick="togglePanel()">
-                        <div class="panel-title">🖋️ NEW RECORD (タップで入力)</div>
-                        <div class="toggle-icon" id="toggleIcon">▼</div>
+                <!-- パネル1: 日記投稿 -->
+                <div class="input-panel" id="diaryPanel">
+                    <div class="panel-header" onclick="togglePanel('diaryPanelContent', 'diaryIcon')">
+                        <div class="panel-title">🖋️ NEW RECORD (日記・SNS)</div>
+                        <div class="toggle-icon" id="diaryIcon">▼</div>
                     </div>
-                    <div class="panel-content" id="panelContent">
+                    <div class="panel-content open" id="diaryPanelContent">
                         <form id="diaryForm" onsubmit="saveRecord(event)">
                             <div class="form-group">
                                 <label for="inputDate">日付</label>
@@ -92,20 +95,47 @@
                             </div>
                             <div class="form-group">
                                 <label for="inputText">本文 または SNS投稿URL</label>
-                                <textarea id="inputText" rows="3" placeholder="今日あったこと、またはURLをペースト..." required></textarea>
+                                <textarea id="inputText" rows="2" placeholder="今日あったこと、またはURLをペースト..." required></textarea>
                             </div>
                             <button type="submit" class="submit-btn">時空に刻む</button>
                         </form>
                     </div>
                 </div>
+
+                <!-- パネル2: 新設・大切な人の命の記録（LIFE LINE） -->
+                <div class="input-panel" id="lifePanel">
+                    <div class="panel-header" onclick="togglePanel('lifePanelContent', 'lifeIcon')">
+                        <div class="panel-title">👥 LIFE LINE (大切な人の人生を刻む)</div>
+                        <div class="toggle-icon" id="lifeIcon">▼</div>
+                    </div>
+                    <div class="panel-content" id="lifePanelContent">
+                        <form id="lifeForm" onsubmit="saveLifeLine(event)">
+                            <div class="form-group">
+                                <label for="lifeName">お名前（パートナー、両親、祖父母など）</label>
+                                <input type="text" id="lifeName" placeholder="例: おじいちゃん、妻" required>
+                            </div>
+                            <div class="form-group row">
+                                <div style="flex: 1;">
+                                    <label for="birthDate">誕生日</label>
+                                    <input type="date" id="birthDate" required>
+                                </div>
+                                <div style="flex: 1;">
+                                    <label for="deathDate">命日（任意）</label>
+                                    <input type="date" id="deathDate">
+                                </div>
+                            </div>
+                            <button type="submit" class="submit-btn" style="border-color: rgba(16, 185, 129, 0.5); color: #a7f3d0;">命の軌跡を繋ぐ</button>
+                        </form>
+                    </div>
+                </div>
             </div>
 
-            <!-- 中央上部（スマホ用）：現在の表示範囲 -->
+            <!-- 中央上部 -->
             <div class="hud">
                 VIEW: <span id="hud-start">400,000年前</span> 〜 <span id="hud-end">現在</span>
             </div>
 
-            <!-- 右側（スマホでは下部）：3Dミニマップとボタン -->
+            <!-- 右下 -->
             <div class="bottom-right-zone interactive">
                 <div class="minimap-container">
                     <div class="minimap-title" id="minimap-mode-title">TOTAL HISTORY SCALE</div>
@@ -135,7 +165,7 @@
             { year: -50000, label: "認知革命（言語や集団シンボルの誕生）" },
             { year: -40000, label: "最古の洞窟壁画（アルタミラ・ラスコー）" },
             { year: -10000, label: "最古の農耕の開始（肥沃な三日月地帯）" },
-            { year: -5500, label: "「车輪」の発明（メソポタミア）" },
+            { year: -5500, label: "「車輪」の発明（メソポタミア）" },
             { year: -3000, label: "メソポタミア・楔形文字の発明" },
             { year: -2560, label: "ギザの大ピラミッド建設" },
             { year: -1200, label: "鉄器時代の始まり（製鉄術の普及）" },
@@ -154,13 +184,15 @@
             { year: 1789, label: "フランス革命の勃発" },
             { year: 1876, label: "ベルが電話の特許を取得" },
             { year: 1903, label: "ライト兄弟が人類初の動力飛行に成功" },
-            { year: 1945, label: "国際連合（UN）の設立" },
+            { year: 1945, status: "WW2終結 / 国際連合（UN）の設立" },
             { year: 1961, label: "ガガーリンが人類初の有人宇宙飛行に成功" },
             { year: 1969, label: "アポロ11号が月面着陸" },
             { year: 1991, label: "ワールド・ワイド・ウェブ（WWW）が一般公開" }
         ];
 
+        // 状態管理（LocalStorage）
         let userRecords = JSON.parse(localStorage.getItem('chronos_user_records')) || [];
+        let lifeLines = JSON.parse(localStorage.getItem('chronos_lifelines')) || []; // 新設：家族の命のラインデータ
         let unlockedHistoryIds = JSON.parse(localStorage.getItem('chronos_unlocked_history')) || [0, 1, 3, 4, 6, 8, 9, 13, 14, 19, 28];
         let latestUnlockedId = localStorage.getItem('chronos_latest_unlocked_id') !== null ? parseInt(localStorage.getItem('chronos_latest_unlocked_id')) : null;
 
@@ -178,17 +210,15 @@
         let startX = 0;
         let originalTargetLeft = 0;
         let originalTargetRight = 0;
-
-        // スマホのピンチズーム用状態管理
         let initialTouchDist = 0;
 
         document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
 
-        // 🧠 スマホの折りたたみパネル制御
-        function togglePanel() {
-            if (window.innerWidth >= 768) return; // PCは常時開く
-            const content = document.getElementById('panelContent');
-            const icon = document.getElementById('toggleIcon');
+        // アコーディオン開閉
+        function togglePanel(contentId, iconId) {
+            if (window.innerWidth >= 768) return;
+            const content = document.getElementById(contentId);
+            const icon = document.getElementById(iconId);
             content.classList.toggle('open');
             icon.style.transform = content.classList.contains('open') ? 'rotate(180deg)' : 'rotate(0deg)';
         }
@@ -196,7 +226,6 @@
         function resizeCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            // レスポンシブにミニマップの実ピクセルを同期
             const container = document.querySelector('.minimap-container');
             if(container) {
                 mCanvas.width = container.clientWidth - 20;
@@ -204,7 +233,7 @@
             }
         }
         window.addEventListener('resize', resizeCanvas);
-        setTimeout(resizeCanvas, 100); // ロード時のサイズ確定を保証
+        setTimeout(resizeCanvas, 100);
 
         function yearToX(year) { return ((year - viewLeft) / (viewRight - viewLeft)) * canvas.width; }
         function xToYear(x) { return viewLeft + (x / canvas.width) * (viewRight - viewLeft); }
@@ -214,18 +243,8 @@
             return date.getFullYear() + (date - new Date(date.getFullYear(), 0, 1)) / (new Date(date.getFullYear() + 1, 0, 1) - new Date(date.getFullYear(), 0, 1));
         }
 
-        function saveRecord(e) {
-            e.preventDefault();
-            const dateVal = document.getElementById('inputDate').value;
-            const textVal = document.getElementById('inputText').value.trim();
-            if (!textVal) return;
-
-            const yearDecimal = dateToYearDecimal(dateVal);
-            const isUrl = textVal.startsWith('http://') || textVal.startsWith('https://');
-
-            userRecords.push({ date: dateVal, year: yearDecimal, text: textVal, isUrl: isUrl });
-            localStorage.setItem('chronos_user_records', JSON.stringify(userRecords));
-
+        // 🧠 新設：世界史を1つランダムに解放してカメラをそこへ向かわせる共通関数
+        function unlockRandomHistory(targetYearForFallback) {
             const lockedIds = HISTORICAL_MASTER_DB.map((_, i) => i).filter(i => !unlockedHistoryIds.includes(i));
 
             if (lockedIds.length > 0) {
@@ -235,62 +254,84 @@
                 localStorage.setItem('chronos_latest_unlocked_id', latestUnlockedId);
                 localStorage.setItem('chronos_unlocked_history', JSON.stringify(unlockedHistoryIds));
                 
-                alert(`歴史に刻まれました。\n新着史実「${HISTORICAL_MASTER_DB[randomId].label}」解放！`);
+                alert(`時空が連動しました。\n新たな歴史の記憶「${HISTORICAL_MASTER_DB[randomId].label || HISTORICAL_MASTER_DB[randomId].status}」が解放されました！`);
                 targetLeft = HISTORICAL_MASTER_DB[randomId].year - 15;
                 targetRight = HISTORICAL_MASTER_DB[randomId].year + 15;
             } else {
-                alert(`歴史に刻まれました！`);
-                targetLeft = yearDecimal - 1;
-                targetRight = yearDecimal + 1;
+                alert(`時空に記録されました！`);
+                targetLeft = targetYearForFallback - 1;
+                targetRight = targetYearForFallback + 1;
             }
+        }
+
+        // 日記保存
+        function saveRecord(e) {
+            e.preventDefault();
+            const dateVal = document.getElementById('inputDate').value;
+            const textVal = document.getElementById('inputText').value.trim();
+            if (!textVal) return;
+
+            const yearDecimal = dateToYearDecimal(dateVal);
+            userRecords.push({ date: dateVal, year: yearDecimal, text: textVal, isUrl: textVal.startsWith('http://') || textVal.startsWith('https://') });
+            localStorage.setItem('chronos_user_records', JSON.stringify(userRecords));
+
+            unlockRandomHistory(yearDecimal);
             document.getElementById('inputText').value = '';
-            if (window.innerWidth < 768) togglePanel(); // スマホでは自動で閉じる
+            if (window.innerWidth < 768) togglePanel('diaryPanelContent', 'diaryIcon');
+        }
+
+        // 🧠 新設：家族のライフライン保存
+        function saveLifeLine(e) {
+            e.preventDefault();
+            const name = document.getElementById('lifeName').value.trim();
+            const birth = document.getElementById('birthDate').value;
+            const death = document.getElementById('deathDate').value;
+
+            if (!name || !birth) return;
+
+            const birthYear = dateToYearDecimal(birth);
+            const deathYear = death ? dateToYearDecimal(death) : null;
+
+            lifeLines.push({ name: name, birthDate: birth, deathDate: death, birthYear: birthYear, deathYear: deathYear });
+            localStorage.setItem('chronos_lifelines', JSON.stringify(lifeLines));
+
+            // 入力された誕生日に一番近い歴史座標をベースに、ランダムエピソードを1つ解放
+            unlockRandomHistory(birthYear);
+
+            // フォームリセット
+            document.getElementById('lifeName').value = '';
+            document.getElementById('birthDate').value = '';
+            document.getElementById('deathDate').value = '';
+            if (window.innerWidth < 768) togglePanel('lifePanelContent', 'lifeIcon');
         }
 
         function draw3DMinimap() {
             mCtx.clearRect(0, 0, mCanvas.width, mCanvas.height);
             const currentRange = Math.max(0.001, viewRight - viewLeft);
             const zoomRatio = TOTAL_SPAN / currentRange;
-            const cX = mCanvas.width / 2;
-            const cY = mCanvas.height / 2;
+            const cX = mCanvas.width / 2; const cY = mCanvas.height / 2;
 
             if (zoomRatio < 15) {
                 document.getElementById('minimap-mode-title').innerText = "LINEAR SCALE (全景)";
-                const midY = mCanvas.height / 2;
-                mCtx.beginPath(); mCtx.strokeStyle = 'rgba(75, 85, 99, 0.4)'; mCtx.lineWidth = 2;
+                const midY = mCanvas.height / 2; mCtx.beginPath(); mCtx.strokeStyle = 'rgba(75, 85, 99, 0.4)'; mCtx.lineWidth = 2;
                 mCtx.moveTo(10, midY); mCtx.lineTo(mCanvas.width - 10, midY); mCtx.stroke();
-
-                const leftRatio = (viewLeft - START_YEAR) / TOTAL_SPAN;
-                const rightRatio = (viewRight - START_YEAR) / TOTAL_SPAN;
-                const w = mCanvas.width - 20;
+                const leftRatio = (viewLeft - START_YEAR) / TOTAL_SPAN; const rightRatio = (viewRight - START_YEAR) / TOTAL_SPAN; const w = mCanvas.width - 20;
                 mCtx.fillStyle = 'rgba(243, 244, 246, 0.15)'; mCtx.strokeStyle = 'rgba(243, 244, 246, 0.8)';
                 mCtx.fillRect(10 + leftRatio * w, midY - 6, Math.max(2, (rightRatio - leftRatio) * w), 12);
                 mCtx.strokeRect(10 + leftRatio * w, midY - 6, Math.max(2, (rightRatio - leftRatio) * w), 12);
             } else {
                 document.getElementById('minimap-mode-title').innerText = `3D VORTEX (×${Math.floor(zoomRatio).toLocaleString()})`;
-                const segments = window.innerWidth >= 768 ? 120 : 80; // スマホでは軽量化
-                
+                const segments = window.innerWidth >= 768 ? 120 : 80;
                 for (let i = segments; i >= 0; i--) {
-                    const z = i / segments;
-                    const perspective = 1 / (z + 0.1); 
-                    const angle = z * Math.PI * 6 - (Math.log10(zoomRatio) * 0.8);
+                    const z = i / segments; const perspective = 1 / (z + 0.1); const angle = z * Math.PI * 6 - (Math.log10(zoomRatio) * 0.8);
                     const baseRadius = (window.innerWidth >= 768 ? 50 : 35) * (1 - z * 0.8);
-                    const x = cX + Math.cos(angle) * baseRadius * (perspective * 0.2);
-                    const y = cY + Math.sin(angle) * baseRadius * (perspective * 0.2);
-                    mCtx.fillStyle = `rgba(75, 85, 99, ${(1 - z) * 0.4})`;
-                    mCtx.beginPath(); mCtx.arc(x, y, Math.max(0.1, 1.5 * perspective * 0.1), 0, Math.PI * 2); mCtx.fill();
+                    const x = cX + Math.cos(angle) * baseRadius * (perspective * 0.2); const y = cY + Math.sin(angle) * baseRadius * (perspective * 0.2);
+                    mCtx.fillStyle = `rgba(75, 85, 99, ${(1 - z) * 0.4})`; mCtx.beginPath(); mCtx.arc(x, y, Math.max(0.1, 1.5 * perspective * 0.1), 0, Math.PI * 2); mCtx.fill();
                 }
-
-                const centerProgress = (viewLeft - START_YEAR) / TOTAL_SPAN;
-                const myZ = Math.min(0.95, 1 - (15 / zoomRatio));
-                const myPerspective = 1 / (myZ + 0.1);
-                const myAngle = myZ * Math.PI * 6 - (Math.log10(zoomRatio) * 0.8) + (centerProgress * 2);
-                const myBaseRadius = (window.innerWidth >= 768 ? 50 : 35) * (1 - myZ * 0.8);
-                const indicatorX = cX + Math.cos(myAngle) * myBaseRadius * (myPerspective * 0.2);
-                const indicatorY = cY + Math.sin(myAngle) * myBaseRadius * (myPerspective * 0.2);
-
-                mCtx.beginPath(); mCtx.arc(indicatorX, indicatorY, Math.max(1, (3 + Math.sin(Date.now() / 150) * 1.5) * (myPerspective * 0.15)), 0, Math.PI * 2);
-                mCtx.strokeStyle = '#60a5fa'; mCtx.lineWidth = 1.5; mCtx.stroke();
+                const centerProgress = (viewLeft - START_YEAR) / TOTAL_SPAN; const myZ = Math.min(0.95, 1 - (15 / zoomRatio)); const myPerspective = 1 / (myZ + 0.1);
+                const myAngle = myZ * Math.PI * 6 - (Math.log10(zoomRatio) * 0.8) + (centerProgress * 2); const myBaseRadius = (window.innerWidth >= 768 ? 50 : 35) * (1 - myZ * 0.8);
+                const indicatorX = cX + Math.cos(myAngle) * myBaseRadius * (myPerspective * 0.2); const indicatorY = cY + Math.sin(myAngle) * myBaseRadius * (myPerspective * 0.2);
+                mCtx.beginPath(); mCtx.arc(indicatorX, indicatorY, Math.max(1, (3 + Math.sin(Date.now() / 150) * 1.5) * (myPerspective * 0.15)), 0, Math.PI * 2); mCtx.strokeStyle = '#60a5fa'; mCtx.lineWidth = 1.5; mCtx.stroke();
             }
         }
 
@@ -299,17 +340,64 @@
             viewRight += (targetRight - viewRight) * EASE_FACTOR;
 
             draw3DMinimap();
-
             ctx.fillStyle = '#030712'; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // 🧠 修正：スマホ画面（特に縦画面）で文字が見やすくなるよう、時間軸の基準線を中央（0.5）からやや下（0.62）へ配置
-            const midY = canvas.height * (window.innerWidth >= 768 ? 0.5 : 0.62);
+            const isMobile = window.innerWidth < 768;
+            const midY = canvas.height * (isMobile ? 0.65 : 0.5);
             const currentRange = viewRight - viewLeft;
 
+            // 1. 人類史のメイン時間軸
             ctx.beginPath(); ctx.strokeStyle = 'rgba(75, 85, 99, 0.3)'; ctx.lineWidth = 2;
             ctx.moveTo(0, midY); ctx.lineTo(canvas.width, midY); ctx.stroke();
 
-            // 歴史イベント描画
+            // 🧠 2. 新設：家族のライフライン（LIFE LINE）の描画
+            lifeLines.forEach((line, index) => {
+                const xStart = yearToX(line.birthYear);
+                // 命日がない場合は現在（2026年）までラインを伸ばす
+                const xEnd = yearToX(line.deathYear ? line.deathYear : 2026);
+
+                // 画面内に少しでも被っていれば描画
+                if (Math.max(xStart, xEnd) < 0 || Math.min(xStart, xEnd) > canvas.width) return;
+
+                // ライフラインごとに少しずつ上下にずらして重なりを避ける
+                const lineY = midY + (isMobile ? 55 : 70) + (index * (isMobile ? 14 : 18));
+                let alpha = currentRange > 10000 ? 0.1 : (currentRange > 2000 ? 0.4 : 1);
+
+                // 命の軌跡（グラデーションライン）
+                ctx.beginPath();
+                ctx.lineWidth = isMobile ? 2 : 3;
+                ctx.strokeStyle = line.deathYear ? `rgba(16, 185, 129, ${alpha * 0.6})` : `rgba(52, 211, 153, ${alpha})`; // 亡くなっている人は少し落ち着いた緑
+                ctx.moveTo(xStart, lineY);
+                ctx.lineTo(xEnd, lineY);
+                ctx.stroke();
+
+                // 誕生ポイント（小さな緑の光）
+                ctx.beginPath(); ctx.arc(xStart, lineY, 3, 0, Math.PI * 2);
+                ctx.fillStyle = '#6ee7b7'; ctx.fill();
+
+                // 終了ポイント（亡くなっている場合は十字、生存は矢印風ドット）
+                ctx.beginPath();
+                if (line.deathYear) {
+                    // 命日のマーク（小さな十字架・静かな区切り）
+                    ctx.strokeStyle = `rgba(244, 63, 94, ${alpha})`; ctx.lineWidth = 1.5;
+                    ctx.moveTo(xEnd - 3, lineY); ctx.lineTo(xEnd + 3, lineY);
+                    ctx.moveTo(xEnd, lineY - 3); ctx.lineTo(xEnd, lineY + 3);
+                    ctx.stroke();
+                } else {
+                    ctx.arc(xEnd, lineY, 2, 0, Math.PI * 2); ctx.fillStyle = '#34d399'; ctx.fill();
+                }
+
+                // 名前ラベル（ズームがある程度近いときのみ表示）
+                if (currentRange < 5000) {
+                    ctx.fillStyle = line.deathYear ? `rgba(167, 243, 208, ${alpha * 0.8})` : `rgba(209, 250, 229, ${alpha})`;
+                    ctx.font = isMobile ? '9px sans-serif' : '10px sans-serif';
+                    ctx.textAlign = 'left';
+                    const ageLabel = line.deathYear ? '（永眠）' : '';
+                    ctx.fillText(`${line.name}${ageLabel}`, Math.max(10, xStart), lineY - 4);
+                }
+            });
+
+            // 3. 歴史イベント描画
             unlockedHistoryIds.forEach(id => {
                 const event = HISTORICAL_MASTER_DB[id];
                 const x = yearToX(event.year);
@@ -324,63 +412,51 @@
 
                 ctx.beginPath(); ctx.arc(x, midY, isLatestNewEvent ? 6 : 4, 0, Math.PI * 2);
                 if (isLatestNewEvent) {
-                    ctx.fillStyle = `rgba(59, 130, 246, ${alpha})`;
-                    ctx.shadowBlur = 10 + Math.sin(Date.now() / 100) * 6; ctx.shadowColor = '#3b82f6';
+                    ctx.fillStyle = 'rgba(59, 130, 246, 1)'; ctx.shadowBlur = 10 + Math.sin(Date.now() / 100) * 6; ctx.shadowColor = '#3b82f6';
                 } else {
                     ctx.fillStyle = `rgba(243, 244, 246, ${alpha})`; ctx.shadowBlur = 6; ctx.shadowColor = '#fff';
                 }
                 ctx.fill(); ctx.shadowBlur = 0;
 
-                // スマホ用にフォントサイズを動的に調整
-                const isMobile = window.innerWidth < 768;
                 ctx.fillStyle = isLatestNewEvent ? `rgba(147, 197, 253, ${alpha})` : `rgba(156, 163, 175, ${alpha * 0.8})`;
-                ctx.font = isMobile ? '9px monospace' : '10px monospace';
-                ctx.textAlign = 'center';
-                ctx.fillText(event.year < 0 ? `${Math.abs(event.year).toLocaleString()}年前` : `西暦${event.year}年`, x, midY + (isMobile ? 20 : 25));
+                ctx.font = isMobile ? '9px monospace' : '10px monospace'; ctx.textAlign = 'center';
+                ctx.fillText(event.year < 0 ? `${Math.abs(event.year).toLocaleString()}年前` : `西暦${event.year}年`, x, midY + (isMobile ? 18 : 25));
 
                 ctx.fillStyle = isLatestNewEvent ? `rgba(96, 165, 250, ${alpha})` : `rgba(229, 231, 235, ${alpha})`;
-                ctx.font = isMobile ? (isLatestNewEvent ? 'bold 10px sans-serif' : '10px sans-serif') : (isLatestNewEvent ? 'bold 12px sans-serif' : '12px sans-serif');
-                
-                // スマホ縦画面では長いテキストを交互に上下させて重なりを軽減
-                let textY = midY - (isMobile ? 15 : 20);
-                if (isMobile && !isLatestNewEvent && id % 2 === 0) textY = midY - 30;
-                ctx.fillText(event.label + (isLatestNewEvent ? " (NEW)" : ""), x, textY);
+                ctx.font = isMobile ? '10px sans-serif' : '12px sans-serif';
+                let textY = midY - (isMobile ? 12 : 20);
+                if (isMobile && !isLatestNewEvent && id % 2 === 0) textY = midY - 24;
+                ctx.fillText((event.label || event.status) + (isLatestNewEvent ? " (NEW)" : ""), x, textY);
             });
 
-            // ユーザーデータ描画
+            // 4. ユーザー日記・SNS描画
             linkContainer.innerHTML = '';
             userRecords.forEach((record, index) => {
                 const x = yearToX(record.year);
                 if (x < -200 || x > canvas.width + 200) return;
 
                 let alpha = currentRange > 50000 ? 0.05 : (currentRange > 5000 ? 0.2 : 1);
-
                 ctx.beginPath(); ctx.arc(x, midY, 6, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(59, 130, 246, ${alpha})`; ctx.shadowBlur = 15; ctx.shadowColor = '#3b82f6'; ctx.fill(); ctx.shadowBlur = 0;
 
                 if (currentRange < 2000) {
-                    const isMobile = window.innerWidth < 768;
                     ctx.fillStyle = '#60a5fa'; ctx.font = 'bold 10px monospace'; ctx.textAlign = 'center';
-                    ctx.fillText(record.date, x, midY + (isMobile ? 35 : 42));
+                    ctx.fillText(record.date, x, midY + (isMobile ? 32 : 42));
 
                     if (record.isUrl) {
                         const btn = document.createElement('a');
                         btn.href = record.text; btn.target = '_blank'; btn.className = 'timeline-link-btn';
-                        btn.innerText = '🔗 LINK'; 
-                        btn.style.left = `${x - 28}px`;
-                        btn.style.top = `${midY - (isMobile ? 40 : 45)}px`;
+                        btn.innerText = '🔗 LINK'; btn.style.left = `${x - 28}px`; btn.style.top = `${midY - (isMobile ? 32 : 45)}px`;
                         linkContainer.appendChild(btn);
                     } else {
                         ctx.fillStyle = '#93c5fd'; ctx.font = isMobile ? '11px sans-serif' : '12px sans-serif';
-                        // 複数日記がある場合の縦軸の重なり回避
-                        let diaryY = midY - (isMobile ? 15 : 40);
-                        if(isMobile && index % 2 === 0) diaryY = midY - 26;
+                        let diaryY = midY - (isMobile ? 12 : 40);
+                        if(isMobile && index % 2 === 0) diaryY = midY - 24;
                         ctx.fillText(record.text, x, diaryY);
                     }
                 }
             });
 
-            // HUD更新
             document.getElementById('hud-start').innerText = viewLeft < 0 ? `${Math.floor(Math.abs(viewLeft)).toLocaleString()}年前` : `西暦${Math.floor(viewLeft)}年`;
             document.getElementById('hud-end').innerText = viewRight < 0 ? `${Math.floor(Math.abs(viewRight)).toLocaleString()}年前` : `西暦${Math.floor(viewRight)}年`;
 
@@ -388,71 +464,32 @@
         }
 
         function jumpTo(targetYear) {
-            if (targetYear === 2026) { targetLeft = 2024; targetRight = 2027; }
+            if (targetYear === 2026) { targetLeft = 1930; targetRight = 2035; } // 大切な人のラインが見えやすい範囲へ
             else { targetLeft = START_YEAR; targetRight = END_YEAR; }
         }
 
-        // 🧠 ズームロジック関数（PC/スマホ共通）
         function applyZoom(zoomFactor, centerX) {
-            const mouseYear = xToYear(centerX);
-            const currentRange = targetRight - targetLeft;
-            const newRange = currentRange * zoomFactor;
-
-            if (newRange < 0.005 && zoomFactor < 1) return;
-            if (newRange > TOTAL_SPAN * 1.5 && zoomFactor > 1) return;
-
-            const ratio = centerX / canvas.width;
-            targetLeft = mouseYear - newRange * ratio;
-            targetRight = mouseYear + newRange * (1 - ratio);
+            const mouseYear = xToYear(centerX); const currentRange = targetRight - targetLeft; const newRange = currentRange * zoomFactor;
+            if (newRange < 0.005 && zoomFactor < 1) return; if (newRange > TOTAL_SPAN * 1.5 && zoomFactor > 1) return;
+            const ratio = centerX / canvas.width; targetLeft = mouseYear - newRange * ratio; targetRight = mouseYear + newRange * (1 - ratio);
         }
 
-        // PC用マウスホイール
-        window.addEventListener('wheel', (e) => {
-            applyZoom(e.deltaY > 0 ? 1.3 : 0.7, e.clientX);
-        });
+        window.addEventListener('wheel', (e) => { applyZoom(e.deltaY > 0 ? 1.3 : 0.7, e.clientX); });
 
-        // 🧠 スマホ用タッチイベント（ドラッグ＆2本指ピンチズーム対応）
+        // スマホタッチ
         canvas.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 1) {
-                isDragging = true; startX = e.touches[0].clientX;
-                originalTargetLeft = targetLeft; originalTargetRight = targetRight;
-            } else if (e.touches.length === 2) {
-                isDragging = false;
-                initialTouchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                originalTargetLeft = targetLeft; originalTargetRight = targetRight;
-            }
+            if (e.touches.length === 1) { isDragging = true; startX = e.touches[0].clientX; originalTargetLeft = targetLeft; originalTargetRight = targetRight; }
+            else if (e.touches.length === 2) { isDragging = false; initialTouchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); originalTargetLeft = targetLeft; originalTargetRight = targetRight; }
         });
-
         canvas.addEventListener('touchmove', (e) => {
-            if (isDragging && e.touches.length === 1) {
-                const currentTargetRange = originalTargetRight - originalTargetLeft;
-                const deltaX = e.touches[0].clientX - startX;
-                targetLeft = originalTargetLeft - deltaX * (currentTargetRange / canvas.width);
-                targetRight = originalTargetRight - deltaX * (currentTargetRange / canvas.width);
-            } else if (e.touches.length === 2) {
-                const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
-                if (initialTouchDist > 0) {
-                    // ピンチイン・アウトの比率を計算
-                    const factor = initialTouchDist / dist;
-                    const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-                    applyZoom(factor > 1 ? 1.08 : 0.92, centerX);
-                }
-            }
+            if (isDragging && e.touches.length === 1) { const currentTargetRange = originalTargetRight - originalTargetLeft; targetLeft = originalTargetLeft - (e.touches[0].clientX - startX) * (currentTargetRange / canvas.width); targetRight = originalTargetRight - (e.touches[0].clientX - startX) * (currentTargetRange / canvas.width); }
+            else if (e.touches.length === 2 && initialTouchDist > 0) { const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); applyZoom(initialTouchDist / dist > 1 ? 1.05 : 0.95, (e.touches[0].clientX + e.touches[1].clientX) / 2); }
         });
-
         canvas.addEventListener('touchend', () => { isDragging = false; initialTouchDist = 0; });
 
-        // PC用ドラッグ
-        canvas.addEventListener('mousedown', (e) => {
-            isDragging = true; startX = e.clientX;
-            originalTargetLeft = targetLeft; originalTargetRight = targetRight;
-        });
-        window.addEventListener('mousemove', (e) => {
-            if (!isDragging) return;
-            const currentTargetRange = originalTargetRight - originalTargetLeft;
-            targetLeft = originalTargetLeft - (e.clientX - startX) * (currentTargetRange / canvas.width);
-            targetRight = originalTargetRight - (e.clientX - startX) * (currentTargetRange / canvas.width);
-        });
+        // PCドラッグ
+        canvas.addEventListener('mousedown', (e) => { isDragging = true; startX = e.clientX; originalTargetLeft = targetLeft; originalTargetRight = targetRight; });
+        window.addEventListener('mousemove', (e) => { if (!isDragging) return; const currentTargetRange = originalTargetRight - originalTargetLeft; targetLeft = originalTargetLeft - (e.clientX - startX) * (currentTargetRange / canvas.width); targetRight = originalTargetRight - (e.clientX - startX) * (currentTargetRange / canvas.width); });
         window.addEventListener('mouseup', () => { isDragging = false; });
 
         requestAnimationFrame(draw);
