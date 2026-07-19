@@ -12,19 +12,18 @@
         #timelineCanvas { display: block; width: 100%; height: 100%; cursor: grab; }
         #timelineCanvas:active { cursor: grabbing; }
 
+        /* 全体を覆うUIレイヤー */
         .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; }
         .interactive { pointer-events: auto; }
 
-        /* 左側：スクロール可能なUIゾーン */
-        .left-zone { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 10px; justify-content: flex-start; max-height: 50%; overflow-y: auto; pointer-events: auto; }
-        /* スクロールバーの非表示（見た目の美しさ重視） */
-        .left-zone::-webkit-scrollbar { display: none; }
+        /* 左側ゾーン：スマホ用の初期配置 */
+        .left-zone { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 10px; justify-content: flex-start; pointer-events: auto; }
         
         header h1 { font-size: 1.25rem; font-weight: 300; letter-spacing: 0.15em; color: #9ca3af; text-shadow: 0 0 10px rgba(156, 163, 175, 0.3); }
         header p { font-size: 0.7rem; color: #4b5563; margin-top: 2px; }
 
         /* 入力パネル共通スタイル */
-        .input-panel { background: rgba(11, 15, 26, 0.9); border: 1px solid rgba(75, 85, 99, 0.4); border-radius: 8px; padding: 12px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+        .input-panel { background: rgba(11, 15, 26, 0.9); border: 1px solid rgba(75, 85, 99, 0.4); border-radius: 8px; padding: 12px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.6); width: 100%; }
         .panel-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .panel-title { font-size: 0.75rem; letter-spacing: 0.1em; color: #9ca3af; font-weight: bold; }
         .toggle-icon { font-size: 0.75rem; color: #6b7280; transition: transform 0.3s; }
@@ -54,16 +53,43 @@
 
         .timeline-link-btn { position: absolute; background: rgba(37, 99, 235, 0.9); border: 1px solid #60a5fa; color: white; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; cursor: pointer; text-decoration: none; pointer-events: auto; z-index: 10; box-shadow: 0 2px 8px rgba(37,99,235,0.4); }
 
+        /* 💡 完璧な解決：PC大画面用の徹底したレイアウト・オーバーライド */
         @media (min-width: 768px) {
-            .ui-layer { flex-direction: row; padding: 24px; }
-            .left-zone { max-width: 340px; max-height: none; overflow-y: visible; gap: 16px; }
-            .input-panel { padding: 16px; }
+            .ui-layer { 
+                flex-direction: row; 
+                padding: 24px; 
+                display: grid;
+                grid-template-columns: 340px 1fr 320px;
+                grid-template-rows: auto 1fr auto;
+                grid-template-areas: 
+                    "header  hud     . "
+                    "diary   .       . "
+                    "life    .       minimap";
+                height: 100%;
+                width: 100%;
+            }
+
+            /* 各パーツを重ならないグリッド宇宙に完全隔離 */
+            header { grid-area: header; }
+            .hud { grid-area: hud; align-self: flex-start; font-size: 0.8rem; padding: 12px 20px; border-radius: 4px; border: none; border-left: 2px solid #374151; margin-top: 0; justify-self: center; }
+            
+            /* タイムラインの「上」に配置される日記パネル */
+            #diaryPanel { grid-area: diary; max-width: 340px; padding: 16px; align-self: start; margin-top: 10px; }
+            
+            /* タイムラインの「下」に配置されるライフラインパネル */
+            #lifePanel { grid-area: life; max-width: 340px; padding: 16px; align-self: end; margin-bottom: 10px; }
+            
+            /* 右下ゾーン */
+            .bottom-right-zone { grid-area: minimap; width: 320px; }
+
+            /* PCでは折りたたみを解除して常時表示 */
             .panel-content { max-height: none !important; margin-top: 12px; }
             .toggle-icon { display: none; }
-            .hud { align-self: flex-start; font-size: 0.8rem; padding: 12px 20px; border-radius: 4px; border: none; border-left: 2px solid #374151; margin-top: 0; }
-            .bottom-right-zone { width: 320px; }
             button.ui-btn { font-size: 0.8rem; padding: 12px; }
             #minimapCanvas { height: 130px; }
+            
+            /* 元のスマホ用コンテナのフレックス構造をPCでは解除 */
+            .left-zone { display: contents; } 
         }
     </style>
 </head>
@@ -74,15 +100,15 @@
         <div id="link-buttons-container"></div>
         
         <div class="ui-layer">
-            <!-- 左側：各種入力パネル -->
+            <!-- PCでは『left-zone』の縛りを解除し、グリッドによる上下完全分離を行います -->
             <div class="left-zone">
-                <header>
+                <header class="interactive">
                     <h1>40万年日記</h1>
                     <p>人類史の深淵と、個の記録</p>
                 </header>
 
-                <!-- パネル1: 日記投稿 -->
-                <div class="input-panel" id="diaryPanel">
+                <!-- パネル1: 日記投稿（PCでは中央軸より「上」のエリアに配置） -->
+                <div class="input-panel interactive" id="diaryPanel">
                     <div class="panel-header" onclick="togglePanel('diaryPanelContent', 'diaryIcon')">
                         <div class="panel-title">🖋️ NEW RECORD (日記・SNS)</div>
                         <div class="toggle-icon" id="diaryIcon">▼</div>
@@ -102,8 +128,8 @@
                     </div>
                 </div>
 
-                <!-- パネル2: 新設・大切な人の命の記録（LIFE LINE） -->
-                <div class="input-panel" id="lifePanel">
+                <!-- パネル2: ライフライン（PCでは中央軸より「下」のエリアに配置） -->
+                <div class="input-panel interactive" id="lifePanel">
                     <div class="panel-header" onclick="togglePanel('lifePanelContent', 'lifeIcon')">
                         <div class="panel-title">👥 LIFE LINE (大切な人の人生を刻む)</div>
                         <div class="toggle-icon" id="lifeIcon">▼</div>
@@ -184,15 +210,14 @@
             { year: 1789, label: "フランス革命の勃発" },
             { year: 1876, label: "ベルが電話の特許を取得" },
             { year: 1903, label: "ライト兄弟が人類初の動力飛行に成功" },
-            { year: 1945, status: "WW2終結 / 国際連合（UN）の設立" },
+            { year: 1945, label: "WW2終結 / 国際連合（UN）の設立" },
             { year: 1961, label: "ガガーリンが人類初の有人宇宙飛行に成功" },
             { year: 1969, label: "アポロ11号が月面着陸" },
             { year: 1991, label: "ワールド・ワイド・ウェブ（WWW）が一般公開" }
         ];
 
-        // 状態管理（LocalStorage）
         let userRecords = JSON.parse(localStorage.getItem('chronos_user_records')) || [];
-        let lifeLines = JSON.parse(localStorage.getItem('chronos_lifelines')) || []; // 新設：家族の命のラインデータ
+        let lifeLines = JSON.parse(localStorage.getItem('chronos_lifelines')) || []; 
         let unlockedHistoryIds = JSON.parse(localStorage.getItem('chronos_unlocked_history')) || [0, 1, 3, 4, 6, 8, 9, 13, 14, 19, 28];
         let latestUnlockedId = localStorage.getItem('chronos_latest_unlocked_id') !== null ? parseInt(localStorage.getItem('chronos_latest_unlocked_id')) : null;
 
@@ -214,7 +239,6 @@
 
         document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
 
-        // アコーディオン開閉
         function togglePanel(contentId, iconId) {
             if (window.innerWidth >= 768) return;
             const content = document.getElementById(contentId);
@@ -243,7 +267,6 @@
             return date.getFullYear() + (date - new Date(date.getFullYear(), 0, 1)) / (new Date(date.getFullYear() + 1, 0, 1) - new Date(date.getFullYear(), 0, 1));
         }
 
-        // 🧠 新設：世界史を1つランダムに解放してカメラをそこへ向かわせる共通関数
         function unlockRandomHistory(targetYearForFallback) {
             const lockedIds = HISTORICAL_MASTER_DB.map((_, i) => i).filter(i => !unlockedHistoryIds.includes(i));
 
@@ -264,7 +287,6 @@
             }
         }
 
-        // 日記保存
         function saveRecord(e) {
             e.preventDefault();
             const dateVal = document.getElementById('inputDate').value;
@@ -280,7 +302,6 @@
             if (window.innerWidth < 768) togglePanel('diaryPanelContent', 'diaryIcon');
         }
 
-        // 🧠 新設：家族のライフライン保存
         function saveLifeLine(e) {
             e.preventDefault();
             const name = document.getElementById('lifeName').value.trim();
@@ -295,10 +316,8 @@
             lifeLines.push({ name: name, birthDate: birth, deathDate: death, birthYear: birthYear, deathYear: deathYear });
             localStorage.setItem('chronos_lifelines', JSON.stringify(lifeLines));
 
-            // 入力された誕生日に一番近い歴史座標をベースに、ランダムエピソードを1つ解放
             unlockRandomHistory(birthYear);
 
-            // フォームリセット
             document.getElementById('lifeName').value = '';
             document.getElementById('birthDate').value = '';
             document.getElementById('deathDate').value = '';
@@ -343,6 +362,8 @@
             ctx.fillStyle = '#030712'; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             const isMobile = window.innerWidth < 768;
+            
+            // 💡 PC版では画面の「完全な中央(0.5)」を貫くように戻し、遮るもののない広大な宇宙を演出
             const midY = canvas.height * (isMobile ? 0.65 : 0.5);
             const currentRange = viewRight - viewLeft;
 
@@ -350,35 +371,26 @@
             ctx.beginPath(); ctx.strokeStyle = 'rgba(75, 85, 99, 0.3)'; ctx.lineWidth = 2;
             ctx.moveTo(0, midY); ctx.lineTo(canvas.width, midY); ctx.stroke();
 
-            // 🧠 2. 新設：家族のライフライン（LIFE LINE）の描画
+            // 2. 家族のライフラインの描画
             lifeLines.forEach((line, index) => {
                 const xStart = yearToX(line.birthYear);
-                // 命日がない場合は現在（2026年）までラインを伸ばす
                 const xEnd = yearToX(line.deathYear ? line.deathYear : 2026);
 
-                // 画面内に少しでも被っていれば描画
                 if (Math.max(xStart, xEnd) < 0 || Math.min(xStart, xEnd) > canvas.width) return;
 
-                // ライフラインごとに少しずつ上下にずらして重なりを避ける
+                // 💡 ライフラインの位置：PC版でも中央の横軸の下側に並ぶように調整
                 const lineY = midY + (isMobile ? 55 : 70) + (index * (isMobile ? 14 : 18));
                 let alpha = currentRange > 10000 ? 0.1 : (currentRange > 2000 ? 0.4 : 1);
 
-                // 命の軌跡（グラデーションライン）
                 ctx.beginPath();
                 ctx.lineWidth = isMobile ? 2 : 3;
-                ctx.strokeStyle = line.deathYear ? `rgba(16, 185, 129, ${alpha * 0.6})` : `rgba(52, 211, 153, ${alpha})`; // 亡くなっている人は少し落ち着いた緑
-                ctx.moveTo(xStart, lineY);
-                ctx.lineTo(xEnd, lineY);
+                ctx.strokeStyle = line.deathYear ? `rgba(16, 185, 129, ${alpha * 0.6})` : `rgba(52, 211, 153, ${alpha})`;
+                ctx.moveTo(xStart, lineY); ctx.lineTo(xEnd, lineY);
                 ctx.stroke();
 
-                // 誕生ポイント（小さな緑の光）
-                ctx.beginPath(); ctx.arc(xStart, lineY, 3, 0, Math.PI * 2);
-                ctx.fillStyle = '#6ee7b7'; ctx.fill();
+                ctx.beginPath(); ctx.arc(xStart, lineY, 3, 0, Math.PI * 2); ctx.fillStyle = '#6ee7b7'; ctx.fill();
 
-                // 終了ポイント（亡くなっている場合は十字、生存は矢印風ドット）
-                ctx.beginPath();
                 if (line.deathYear) {
-                    // 命日のマーク（小さな十字架・静かな区切り）
                     ctx.strokeStyle = `rgba(244, 63, 94, ${alpha})`; ctx.lineWidth = 1.5;
                     ctx.moveTo(xEnd - 3, lineY); ctx.lineTo(xEnd + 3, lineY);
                     ctx.moveTo(xEnd, lineY - 3); ctx.lineTo(xEnd, lineY + 3);
@@ -387,13 +399,10 @@
                     ctx.arc(xEnd, lineY, 2, 0, Math.PI * 2); ctx.fillStyle = '#34d399'; ctx.fill();
                 }
 
-                // 名前ラベル（ズームがある程度近いときのみ表示）
                 if (currentRange < 5000) {
                     ctx.fillStyle = line.deathYear ? `rgba(167, 243, 208, ${alpha * 0.8})` : `rgba(209, 250, 229, ${alpha})`;
-                    ctx.font = isMobile ? '9px sans-serif' : '10px sans-serif';
-                    ctx.textAlign = 'left';
-                    const ageLabel = line.deathYear ? '（永眠）' : '';
-                    ctx.fillText(`${line.name}${ageLabel}`, Math.max(10, xStart), lineY - 4);
+                    ctx.font = isMobile ? '9px sans-serif' : '10px sans-serif'; ctx.textAlign = 'left';
+                    ctx.fillText(`${line.name}${line.deathYear ? '（永眠）' : ''}`, Math.max(10, xStart), lineY - 4);
                 }
             });
 
@@ -464,7 +473,7 @@
         }
 
         function jumpTo(targetYear) {
-            if (targetYear === 2026) { targetLeft = 1930; targetRight = 2035; } // 大切な人のラインが見えやすい範囲へ
+            if (targetYear === 2026) { targetLeft = 1930; targetRight = 2035; }
             else { targetLeft = START_YEAR; targetRight = END_YEAR; }
         }
 
@@ -476,7 +485,6 @@
 
         window.addEventListener('wheel', (e) => { applyZoom(e.deltaY > 0 ? 1.3 : 0.7, e.clientX); });
 
-        // スマホタッチ
         canvas.addEventListener('touchstart', (e) => {
             if (e.touches.length === 1) { isDragging = true; startX = e.touches[0].clientX; originalTargetLeft = targetLeft; originalTargetRight = targetRight; }
             else if (e.touches.length === 2) { isDragging = false; initialTouchDist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY); originalTargetLeft = targetLeft; originalTargetRight = targetRight; }
@@ -487,7 +495,6 @@
         });
         canvas.addEventListener('touchend', () => { isDragging = false; initialTouchDist = 0; });
 
-        // PCドラッグ
         canvas.addEventListener('mousedown', (e) => { isDragging = true; startX = e.clientX; originalTargetLeft = targetLeft; originalTargetRight = targetRight; });
         window.addEventListener('mousemove', (e) => { if (!isDragging) return; const currentTargetRange = originalTargetRight - originalTargetLeft; targetLeft = originalTargetLeft - (e.clientX - startX) * (currentTargetRange / canvas.width); targetRight = originalTargetRight - (e.clientX - startX) * (currentTargetRange / canvas.width); });
         window.addEventListener('mouseup', () => { isDragging = false; });
