@@ -39,7 +39,6 @@
         .hud { background: rgba(3, 7, 18, 0.75); padding: 8px 14px; border-radius: 20px; border: 1px solid rgba(55, 65, 81, 0.5); font-size: 0.7rem; font-family: monospace; color: #9ca3af; align-self: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); backdrop-filter: blur(4px); margin-top: 4px; }
         .hud span { color: #60a5fa; }
 
-        /* 右上：ヘルプ（ガイド）ボタン */
         .help-btn { background: rgba(17, 24, 39, 0.8); border: 1px solid rgba(96, 165, 250, 0.4); color: #93c5fd; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; cursor: pointer; backdrop-filter: blur(4px); transition: all 0.2s; box-shadow: 0 2px 10px rgba(0,0,0,0.4); }
         .help-btn:hover { background: rgba(30, 58, 138, 0.8); border-color: #60a5fa; color: #fff; box-shadow: 0 0 12px rgba(96, 165, 250, 0.4); }
 
@@ -53,7 +52,7 @@
 
         .timeline-link-btn { position: absolute; background: rgba(37, 99, 235, 0.9); border: 1px solid #60a5fa; color: white; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; cursor: pointer; text-decoration: none; pointer-events: auto; z-index: 10; box-shadow: 0 2px 8px rgba(37,99,235,0.4); }
 
-        /* 💡 モーダル（説明ダイアログ）のスタイリング */
+        /* モーダル（説明ダイアログ）のスタイリング */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 20px; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         
@@ -109,7 +108,7 @@
                     <p>人類史の深淵と、個の記録</p>
                 </header>
 
-                <!-- パネル1: 日記投稿（PCでは上エリア） -->
+                <!-- パネル1: 日記投稿 -->
                 <div class="input-panel interactive" id="diaryPanel">
                     <div class="panel-header" onclick="togglePanel('diaryPanelContent', 'diaryIcon')">
                         <div class="panel-title">🖋️ NEW RECORD (日記・SNS)</div>
@@ -130,7 +129,7 @@
                     </div>
                 </div>
 
-                <!-- パネル2: ライフライン（PCでは下エリア） -->
+                <!-- パネル2: ライフライン -->
                 <div class="input-panel interactive" id="lifePanel">
                     <div class="panel-header" onclick="togglePanel('lifePanelContent', 'lifeIcon')">
                         <div class="panel-title">👥 LIFE LINE (大切な人の人生を刻む)</div>
@@ -181,7 +180,7 @@
         </div>
     </div>
 
-    <!-- 💡 モーダル（説明ダイアログ）HTML構造 -->
+    <!-- モーダル（説明ダイアログ） -->
     <div class="modal-overlay" id="modalOverlay" onclick="closeModalOnBg(event)">
         <div class="modal-content">
             <button class="close-btn" onclick="closeModal()">✕</button>
@@ -192,6 +191,7 @@
 
             <ul>
                 <li><strong>歴史の解放：</strong> 日記（またはSNSの投稿URL）や大切な人の記録を残すたびに、人類史のエピソードが1つアンロックされます。</li>
+                <li><strong>推奨閲覧環境：</strong> スマートフォン等でも操作可能ですが、40万年の壮大なスケール感と3D演出を最大限に味わっていただくため、<strong>横長のPC大画面での閲覧を推奨</strong>しています。</li>
                 <li><strong>操作のヒント：</strong> タイムラインを限界まで大きく拡大（ズームイン）すると、右下のミニマップが「3Dの時空の渦（ワームホール）」へと変化します。迷ったときは「現在地へ」ボタンを押すと、一気に現代へジャンプできます。</li>
                 <li><strong>安心のプライバシー：</strong> あなたが綴った日記やデータは、<strong>お使いのブラウザ内だけに安全に保存</strong>されます。外部や第三者に公開されることは一切ありません。</li>
                 <li><strong>歴史データについて：</strong> アンロックされる史実情報はAIがWeb上の情報から抽出しているため、年代や詳細の厳密な正確性を保証するものではありません。時空の広がりを楽しむ演出としてお楽しみください。</li>
@@ -262,7 +262,6 @@
 
         document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
 
-        // 🧠 モーダル（説明画面）制御ロジック
         function openModal() {
             document.getElementById('modalOverlay').classList.add('active');
         }
@@ -273,7 +272,6 @@
             if (e.target.id === 'modalOverlay') closeModal();
         }
 
-        // 初回訪問時だけ自動で説明を表示
         if (!localStorage.getItem('chronos_visited')) {
             setTimeout(openModal, 600);
             localStorage.setItem('chronos_visited', 'true');
