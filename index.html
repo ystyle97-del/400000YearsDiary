@@ -13,16 +13,14 @@
         #timelineCanvas:active { cursor: grabbing; }
 
         /* 全体を覆うUIレイヤー */
-        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; }
+        .ui-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; z-index: 5; }
         .interactive { pointer-events: auto; }
 
-        /* 左側ゾーン：スマホ用の初期配置 */
         .left-zone { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 10px; justify-content: flex-start; pointer-events: auto; }
         
         header h1 { font-size: 1.25rem; font-weight: 300; letter-spacing: 0.15em; color: #9ca3af; text-shadow: 0 0 10px rgba(156, 163, 175, 0.3); }
         header p { font-size: 0.7rem; color: #4b5563; margin-top: 2px; }
 
-        /* 入力パネル共通スタイル */
         .input-panel { background: rgba(11, 15, 26, 0.9); border: 1px solid rgba(75, 85, 99, 0.4); border-radius: 8px; padding: 12px; backdrop-filter: blur(12px); box-shadow: 0 10px 30px rgba(0,0,0,0.6); width: 100%; }
         .panel-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
         .panel-title { font-size: 0.75rem; letter-spacing: 0.1em; color: #9ca3af; font-weight: bold; }
@@ -38,11 +36,13 @@
         
         .submit-btn { width: 100%; background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid rgba(96, 165, 250, 0.5); color: #93c5fd; padding: 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; letter-spacing: 0.05em; }
 
-        /* HUD */
         .hud { background: rgba(3, 7, 18, 0.75); padding: 8px 14px; border-radius: 20px; border: 1px solid rgba(55, 65, 81, 0.5); font-size: 0.7rem; font-family: monospace; color: #9ca3af; align-self: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5); backdrop-filter: blur(4px); margin-top: 4px; }
         .hud span { color: #60a5fa; }
 
-        /* 右下 */
+        /* 右上：ヘルプ（ガイド）ボタン */
+        .help-btn { background: rgba(17, 24, 39, 0.8); border: 1px solid rgba(96, 165, 250, 0.4); color: #93c5fd; padding: 6px 12px; border-radius: 20px; font-size: 0.75rem; cursor: pointer; backdrop-filter: blur(4px); transition: all 0.2s; box-shadow: 0 2px 10px rgba(0,0,0,0.4); }
+        .help-btn:hover { background: rgba(30, 58, 138, 0.8); border-color: #60a5fa; color: #fff; box-shadow: 0 0 12px rgba(96, 165, 250, 0.4); }
+
         .bottom-right-zone { display: flex; flex-direction: column; align-items: flex-end; gap: 10px; width: 100%; max-width: 320px; align-self: flex-end; }
         .controls { display: flex; gap: 8px; width: 100%; }
         button.ui-btn { flex: 1; background: rgba(17, 24, 39, 0.8); border: 1px solid rgba(75, 85, 99, 0.5); color: #e5e7eb; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: all 0.2s; backdrop-filter: blur(4px); text-align: center; }
@@ -53,42 +53,45 @@
 
         .timeline-link-btn { position: absolute; background: rgba(37, 99, 235, 0.9); border: 1px solid #60a5fa; color: white; padding: 4px 10px; border-radius: 20px; font-size: 10px; font-weight: bold; cursor: pointer; text-decoration: none; pointer-events: auto; z-index: 10; box-shadow: 0 2px 8px rgba(37,99,235,0.4); }
 
-        /* 💡 完璧な解決：PC大画面用の徹底したレイアウト・オーバーライド */
+        /* 💡 モーダル（説明ダイアログ）のスタイリング */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 7, 18, 0.85); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; padding: 20px; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        
+        .modal-content { background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(96, 165, 250, 0.3); border-radius: 12px; padding: 24px; max-width: 560px; width: 100%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.8); color: #e2e8f0; line-height: 1.6; font-size: 0.85rem; position: relative; }
+        .modal-content h2 { font-size: 1.1rem; color: #93c5fd; margin-bottom: 12px; font-weight: 400; letter-spacing: 0.1em; border-bottom: 1px solid rgba(53, 64, 86, 0.8); padding-bottom: 8px; }
+        .modal-content p { margin-bottom: 12px; color: #cbd5e1; }
+        .modal-content ul { list-style: none; margin-top: 16px; border-top: 1px dashed rgba(75, 85, 99, 0.4); padding-top: 12px; }
+        .modal-content li { margin-bottom: 10px; padding-left: 18px; position: relative; color: #94a3b8; font-size: 0.8rem; }
+        .modal-content li::before { content: "✦"; position: absolute; left: 0; color: #60a5fa; }
+        .modal-content li strong { color: #f1f5f9; }
+        
+        .close-btn { position: absolute; top: 16px; right: 16px; background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer; transition: color 0.2s; }
+        .close-btn:hover { color: #fff; }
+
         @media (min-width: 768px) {
             .ui-layer { 
-                flex-direction: row; 
-                padding: 24px; 
-                display: grid;
+                flex-direction: row; padding: 24px; display: grid;
                 grid-template-columns: 340px 1fr 320px;
                 grid-template-rows: auto 1fr auto;
                 grid-template-areas: 
-                    "header  hud     . "
-                    "diary   .       . "
+                    "header  hud     help"
+                    "diary   .       ."
                     "life    .       minimap";
-                height: 100%;
-                width: 100%;
+                height: 100%; width: 100%;
             }
 
-            /* 各パーツを重ならないグリッド宇宙に完全隔離 */
             header { grid-area: header; }
             .hud { grid-area: hud; align-self: flex-start; font-size: 0.8rem; padding: 12px 20px; border-radius: 4px; border: none; border-left: 2px solid #374151; margin-top: 0; justify-self: center; }
+            .help-btn { grid-area: help; justify-self: end; align-self: flex-start; padding: 8px 16px; font-size: 0.8rem; }
             
-            /* タイムラインの「上」に配置される日記パネル */
             #diaryPanel { grid-area: diary; max-width: 340px; padding: 16px; align-self: start; margin-top: 10px; }
-            
-            /* タイムラインの「下」に配置されるライフラインパネル */
             #lifePanel { grid-area: life; max-width: 340px; padding: 16px; align-self: end; margin-bottom: 10px; }
-            
-            /* 右下ゾーン */
             .bottom-right-zone { grid-area: minimap; width: 320px; }
 
-            /* PCでは折りたたみを解除して常時表示 */
             .panel-content { max-height: none !important; margin-top: 12px; }
             .toggle-icon { display: none; }
             button.ui-btn { font-size: 0.8rem; padding: 12px; }
             #minimapCanvas { height: 130px; }
-            
-            /* 元のスマホ用コンテナのフレックス構造をPCでは解除 */
             .left-zone { display: contents; } 
         }
     </style>
@@ -100,14 +103,13 @@
         <div id="link-buttons-container"></div>
         
         <div class="ui-layer">
-            <!-- PCでは『left-zone』の縛りを解除し、グリッドによる上下完全分離を行います -->
             <div class="left-zone">
                 <header class="interactive">
                     <h1>40万年日記</h1>
                     <p>人類史の深淵と、個の記録</p>
                 </header>
 
-                <!-- パネル1: 日記投稿（PCでは中央軸より「上」のエリアに配置） -->
+                <!-- パネル1: 日記投稿（PCでは上エリア） -->
                 <div class="input-panel interactive" id="diaryPanel">
                     <div class="panel-header" onclick="togglePanel('diaryPanelContent', 'diaryIcon')">
                         <div class="panel-title">🖋️ NEW RECORD (日記・SNS)</div>
@@ -128,7 +130,7 @@
                     </div>
                 </div>
 
-                <!-- パネル2: ライフライン（PCでは中央軸より「下」のエリアに配置） -->
+                <!-- パネル2: ライフライン（PCでは下エリア） -->
                 <div class="input-panel interactive" id="lifePanel">
                     <div class="panel-header" onclick="togglePanel('lifePanelContent', 'lifeIcon')">
                         <div class="panel-title">👥 LIFE LINE (大切な人の人生を刻む)</div>
@@ -161,6 +163,9 @@
                 VIEW: <span id="hud-start">400,000年前</span> 〜 <span id="hud-end">現在</span>
             </div>
 
+            <!-- 右上：このサイトについてボタン -->
+            <button class="help-btn interactive" onclick="openModal()">❓ このサイトについて</button>
+
             <!-- 右下 -->
             <div class="bottom-right-zone interactive">
                 <div class="minimap-container">
@@ -173,6 +178,24 @@
                     <button class="ui-btn" onclick="jumpTo(-200000)">全景へ</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- 💡 モーダル（説明ダイアログ）HTML構造 -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModalOnBg(event)">
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeModal()">✕</button>
+            <h2>【40万年日記へようこそ】</h2>
+            <p>本サイトは、ホモ・サピエンス誕生から40万年の壮大な歴史年表の上に、あなたの「今日」を刻んでいく日記帳です。</p>
+            <p>年表は40万年前の太古から直近の数年まで、ダイナミックに拡大・縮小できます。画面を直感的に触りながら、時の流れを感じてみてください。</p>
+            <p>単に日記を記録するためではなく、果てしない歴史の中で「自分という存在の小ささ」と「今生きていることの愛おしさ」を実感するための場所です。大切な人の誕生日や命日を記録すれば、その人と歩んだ歴史の重なりも鮮やかに浮かび上がります。</p>
+
+            <ul>
+                <li><strong>歴史の解放：</strong> 日記（またはSNSの投稿URL）や大切な人の記録を残すたびに、人類史のエピソードが1つアンロックされます。</li>
+                <li><strong>操作のヒント：</strong> タイムラインを限界まで大きく拡大（ズームイン）すると、右下のミニマップが「3Dの時空の渦（ワームホール）」へと変化します。迷ったときは「現在地へ」ボタンを押すと、一気に現代へジャンプできます。</li>
+                <li><strong>安心のプライバシー：</strong> あなたが綴った日記やデータは、<strong>お使いのブラウザ内だけに安全に保存</strong>されます。外部や第三者に公開されることは一切ありません。</li>
+                <li><strong>歴史データについて：</strong> アンロックされる史実情報はAIがWeb上の情報から抽出しているため、年代や詳細の厳密な正確性を保証するものではありません。時空の広がりを楽しむ演出としてお楽しみください。</li>
+            </ul>
         </div>
     </div>
 
@@ -238,6 +261,23 @@
         let initialTouchDist = 0;
 
         document.getElementById('inputDate').value = new Date().toISOString().split('T')[0];
+
+        // 🧠 モーダル（説明画面）制御ロジック
+        function openModal() {
+            document.getElementById('modalOverlay').classList.add('active');
+        }
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+        function closeModalOnBg(e) {
+            if (e.target.id === 'modalOverlay') closeModal();
+        }
+
+        // 初回訪問時だけ自動で説明を表示
+        if (!localStorage.getItem('chronos_visited')) {
+            setTimeout(openModal, 600);
+            localStorage.setItem('chronos_visited', 'true');
+        }
 
         function togglePanel(contentId, iconId) {
             if (window.innerWidth >= 768) return;
@@ -362,8 +402,6 @@
             ctx.fillStyle = '#030712'; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             const isMobile = window.innerWidth < 768;
-            
-            // 💡 PC版では画面の「完全な中央(0.5)」を貫くように戻し、遮るもののない広大な宇宙を演出
             const midY = canvas.height * (isMobile ? 0.65 : 0.5);
             const currentRange = viewRight - viewLeft;
 
@@ -378,7 +416,6 @@
 
                 if (Math.max(xStart, xEnd) < 0 || Math.min(xStart, xEnd) > canvas.width) return;
 
-                // 💡 ライフラインの位置：PC版でも中央の横軸の下側に並ぶように調整
                 const lineY = midY + (isMobile ? 55 : 70) + (index * (isMobile ? 14 : 18));
                 let alpha = currentRange > 10000 ? 0.1 : (currentRange > 2000 ? 0.4 : 1);
 
